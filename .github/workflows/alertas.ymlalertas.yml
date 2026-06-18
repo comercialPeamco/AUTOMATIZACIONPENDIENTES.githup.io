@@ -1,0 +1,35 @@
+name: Alertas Diarias Automáticas PEAMCO
+
+on:
+  schedule:
+    # Se ejecuta automáticamente todos los días a las 13:00 UTC (8:00 AM hora de Colombia)
+    - cron: '0 13 * * *'
+  workflow_dispatch: # Activa un botón gris para probar el robot manualmente cuando quieras
+
+jobs:
+  ejecutar-robot:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Descargar archivos del repositorio
+      uses: actions/checkout@v4
+
+    - name: Configurar Entorno Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18
+
+    - name: Ejecutar el script del Robot (robot.js)
+      run: node robot.js
+
+    - name: Enviar Correo Automatizado de Alerta
+      if: env.TIENE_ALERTAS == 'true'
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.gmail.com
+        server_port: 465
+        username: ${{ secrets.NOTIFICADOR_CORREO }}
+        password: ${{ secrets.NOTIFICADOR_CLAVE }}
+        subject: ⚠️ RECORDATORIO COMERCIAL: Alertas Técnicas Ensayos de Aptitud PEAMCO
+        to: comercial@peamco.com.co
+        from: Alertas Automatizadas PEAMCO
+        body: file://cuerpo_correo.txt
