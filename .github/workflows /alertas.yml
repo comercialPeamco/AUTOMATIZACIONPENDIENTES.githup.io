@@ -16,7 +16,7 @@ jobs:
     - name: Configurar Entorno Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 18
+        node-version: 24  # <- Actualizado a la versión más reciente para evitar la advertencia
 
     - name: Ejecutar el script del Robot (robot.js)
       run: node robot.js
