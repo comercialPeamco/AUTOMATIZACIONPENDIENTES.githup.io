@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PEAMCO - Panel Visual Comercial</title>
+    <style>
+        :root {
+            --primary: #0F2C59;
+            --accent: #DAC0A3;
+            --bg: #F8F0E5;
+            --white: #FFFFFF;
+            --danger: #D9534F;
+            --warning: #F0AD4E;
+            --success: #5CB85C;
+            --whatsapp: #25D366;
+            --email: #0275D8;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: var(--white);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        header h1 { margin: 0; font-size: 24px; }
+        header p { margin: 5px 0 0 0; font-size: 14px; opacity: 0.9; }
+
+        /* SECCIÓN DE ALERTAS VISUALES */
+        .alert-section {
+            background-color: #FDF0ED;
+            border: 2px solid var(--danger);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 25px;
+        }
+
+        .alert-section h2 { margin-top: 0; color: var(--danger); font-size: 18px; }
+
+        .alert-card {
+            background-color: var(--white);
+            border-left: 5px solid var(--warning);
+            padding: 12px 20px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .alert-card.vencido { border-left-color: var(--danger); background-color: #FFF5F5; }
+
+        .alert-buttons { display: flex; gap: 10px; }
+
+        .btn-action {
+            padding: 8px 12px;
+            border-radius: 5px;
+            color: var(--white);
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn-mail { background-color: var(--email); }
+        .btn-wa { background-color: var(--whatsapp); }
+
+        /* DISEÑO DE PANELES */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 25px;
+        }
+
+        @media (max-width: 900px) { .dashboard { grid-template-columns: 1fr; } }
+
+        .panel {
+            background-color: var(--white);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .panel h3 { margin-top: 0; color: var(--primary); border-bottom: 2px solid var(--bg); padding-bottom: 10px; }
+
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; margin-bottom: 4px; font-size: 12px; font-weight: bold; }
+        .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #CCC; border-radius: 4px; box-sizing: border-box; }
+
+        .btn-save { background-color: var(--primary); color: var(--white); border: none; padding: 10px; width: 100%; border-radius: 4px; cursor: pointer; font-weight: bold; }
+
+        /* TABLA */
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #EEE; font-size: 13px; }
+        th { background-color: var(--primary); color: var(--white); }
+
+        .badge { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; color: var(--white); cursor: pointer; }
+        .badge-pending { background-color: var(--warning); color: #333; }
+        .badge-success { background-color: var(--success); }
+
+        .btn-delete { background-color: var(--danger); color: var(--white); border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
+
+        /* CAJA JSON GENERADO */
+        textarea { width: 100%; height: 120px; font-family: monospace; font-size: 12px; padding: 10px; box-sizing: border-box; background-color: #F4F4F4; border: 1px solid #CCC; border-radius: 4px; resize: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>PEAMCO S.A.S. — Panel Comercial del Área Técnica</h1>
+        <p>Seguimiento Visual de Ensayos Bilaterales y Alertas de 2 Días</p>
+    </header>
+
+    <!-- ALERTAS EN PANTALLA (2 DÍAS ANTES) -->
+    <div id="alert-section" class="alert-section" style="display: none;">
+        <h2>⚠️ Alertas Activas en Pantalla (Faltan 2 días o Menos)</h2>
+        <div id="alert-container"></div>
+    </div>
+
+    <div class="dashboard">
+        <!-- IZQUIERDA: FORMULARIO -->
+        <div>
+            <div class="panel">
+                <h3>Registrar Programa</h3>
+                <form id="programForm">
+                    <div class="form-group">
+                        <label>Código del Programa:</label>
+                        <input type="text" id="codigo" placeholder="Ej: EA-BA-2026" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre del Ensayo (Bilateral):</label>
+                        <input type="text" id="ensayo" placeholder="Ej: Barras de Acero" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Inicio de Ejecución:</label>
+                        <input type="date" id="inicio" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Fin de Ejecución:</label>
+                        <input type="date" id="fin" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Entrega de Informe Preliminar:</label>
+                        <input type="date" id="preliminar" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Entrega de Informe Final:</label>
+                        <input type="date" id="final" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Entregable Técnico Pendiente:</label>
+                        <select id="pendiente">
+                            <option value="Instrucciones de Ensayo">Instrucciones de Ensayo</option>
+                            <option value="Informe Preliminar">Informe Preliminar</option>
+                            <option value="Informe Final">Informe Final</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-save">Agregar a la Lista</button>
+                </form>
+            </div>
+
+            <!-- EXPORTADOR PARA EL ROBOT -->
+            <div class="panel">
+                <h3>Sincronizar con el Robot de GitHub</h3>
+                <p style="font-size: 11px; color: #666; margin-top: 0;">Copia este texto y pégalo completo dentro de tu archivo <strong>programas.json</strong> en GitHub para que las alertas automáticas al correo funcionen de madrugada:</p>
+                <textarea id="jsonOutput" readonly onclick="this.select()"></textarea>
+            </div>
+        </div>
+
+        <!-- DERECHA: TABLA DE CONTROL -->
+        <div class="panel">
+            <h3>Base de Datos de Monitoreo</h3>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Programa / Ensayo</th>
+                            <th>Ejecución</th>
+                            <th>Informes</th>
+                            <th>Pendiente Técnica</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-entries"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const CONFIG = { correo: "comercial@peamco.com.co", waNum: "573185263597" };
+    let dataStore = JSON.parse(localStorage.getItem('peamco_visual_data')) || [];
+
+    document.getElementById('programForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const entry = {
+            id: Date.now(),
+            codigo: document.getElementById('codigo').value,
+            ensayo: document.getElementById('ensayo').value,
+            inicio: document.getElementById('inicio').value,
+            fin: document.getElementById('fin').value,
+            preliminar: document.getElementById('preliminar').value,
+            final: document.getElementById('final').value,
+            pendiente: document.getElementById('pendiente').value,
+            status: "Pendiente"
+        };
+
+        dataStore.push(entry);
+        updateData();
+        this.reset();
+    });
+
+    function daysRemaining(targetDate) {
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        const target = new Date(targetDate + "T00:00:00");
+        return Math.ceil((target - today) / (1000 * 60 * 60 * 24));
+    }
+
+    function updateData() {
+        localStorage.setItem('peamco_visual_data', JSON.stringify(dataStore));
+        
+        // Actualizar la caja JSON para copiar a GitHub
+        const cleanJSON = dataStore.map(({codigo, ensayo, inicio, fin, preliminar, final, pendiente}) => 
+            ({codigo, ensayo, inicio, fin, preliminar, final, pendiente}));
+        document.getElementById('jsonOutput').value = JSON.stringify(cleanJSON, null, 2);
+
+        render();
+    }
+
+    function render() {
+        const tableBody = document.getElementById('table-entries');
+        const alertSection = document.getElementById('alert-section');
+        const alertContainer = document.getElementById('alert-container');
+        
+        tableBody.innerHTML = "";
+        alertContainer.innerHTML = "";
+        let hasAlerts = false;
+
+        dataStore.forEach(item => {
+            // Evaluador interno de alertas visuales de 2 días
+            const milestones = [
+                { date: item.inicio, name: "Inicio de Ejecución" },
+                { date: item.fin, name: "Fin de Ejecución" },
+                { date: item.preliminar, name: "Informe Preliminar" },
+                { date: item.final, name: "Informe Final" }
+            ];
+
+            milestones.forEach(m => {
+                const days = daysRemaining(m.date);
+                if (days <= 2 && days >= -7) {
+                    hasAlerts = true;
+                    const isOverdue = days < 0;
+                    
+                    const msg = `Hola Equipo Técnico,\n\nLes recordamos que según los plazos comerciales, está próximo o vencido el hito del programa:\n\n• Código: ${item.codigo}\n• Ensayo: ${item.ensayo}\n• Evento: ${m.name} (${m.date})\n• Entregable: ${item.pendiente}\n\nPor favor confirmar gestión.\n\nSaludos,\nÁrea Comercial.`;
+                    const mailHref = `mailto:${CONFIG.correo}?subject=${encodeURIComponent('RECORDATORIO: ' + item.codigo)}&body=${encodeURIComponent(msg)}`;
+                    const waHref = `https://wa.me/${CONFIG.waNum}?text=${encodeURIComponent('*ALERTA PEAMCO*\n\n' + msg)}`;
+
+                    const card = document.createElement('div');
+                    card.className = `alert-card ${isOverdue ? 'vencido' : ''}`;
+                    card.innerHTML = `
+                        <div>
+                            <strong>[${item.codigo}] ${item.ensayo}</strong> — ${m.name}<br>
+                            <small style="font-weight:bold;">${isOverdue ? 'VENCIDO HACE ' + Math.abs(days) + ' DÍAS' : (days === 0 ? 'VENCE HOY' : 'FALTAN ' + days + ' DÍAS')}</small>
+                        </div>
+                        <div class="alert-buttons">
+                            <a href="${mailHref}" class="btn-action btn-mail">📧 Correo</a>
+                            <a href="${waHref}" target="_blank" class="btn-action btn-wa">📲 WhatsApp</a>
+                        </div>
+                    `;
+                    alertContainer.appendChild(card);
+                }
+            });
+
+            // Llenar la tabla visual
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><strong>${item.codigo}</strong><br><span style="color:#666;font-size:11px;">${item.ensayo}</span></td>
+                <td>Inicia: ${item.inicio}<br>Fin: ${item.fin}</td>
+                <td>Preliminar: ${item.preliminar}<br>Final: ${item.final}</td>
+                <td>
+                    <span class="badge ${item.status === 'Pendiente' ? 'badge-pending' : 'badge-success'}" onclick="toggleStatus(${item.id})">
+                        ${item.pendiente}: ${item.status}
+                    </span>
+                </td>
+                <td><button class="btn-delete" onclick="deleteItem(${item.id})">❌</button></td>
+            `;
+            tableBody.appendChild(row);
+        });
+
+        alertSection.style.display = hasAlerts ? 'block' : 'none';
+    }
+
+    function toggleStatus(id) {
+        dataStore = dataStore.map(item => {
+            if (item.id === id) item.status = item.status === "Pendiente" ? "Entregado" : "Pendiente";
+            return item;
+        });
+        updateData();
+    }
+
+    function deleteItem(id) {
+        if (confirm("¿Eliminar este programa?")) {
+            dataStore = dataStore.filter(item => item.id !== id);
+            updateData();
+        }
+    }
+
+    // Carga inicial
+    updateData();
+</script>
+</body>
+</html>
