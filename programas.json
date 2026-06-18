@@ -1,12 +1,101 @@
-
 [
   {
-    "codigo": "PEA-SEA-000",
-    "ensayo": "VVVVV",
-    "inicio": "2026-06-20",
-    "fin": "2026-06-20",
-    "preliminar": "2026-06-20",
-    "final": "2026-06-20",
+    "codigo": "PEA-SEA-491 ",
+    "ensayo": "Bilateral Barras",
+    "inicio": "2026-06-18",
+    "fin": "2026-06-25",
+    "preliminar": "2026-07-02",
+    "final": "2026-06-09",
+    "pendiente": "Instrucciones de Ensayo"
+  },
+  {
+    "codigo": "PEA-SEA-448 ",
+    "ensayo": "Densímetro Núclear",
+    "inicio": "2026-07-16",
+    "fin": "2026-07-16",
+    "preliminar": "2026-07-30",
+    "final": "2026-08-07",
+    "pendiente": "Instrucciones de Ensayo"
+  },
+  {
+    "codigo": "PEA-SEA-427-443 ",
+    "ensayo": "Ronda 2 Construcción",
+    "inicio": "2026-07-22",
+    "fin": "2026-07-31",
+    "preliminar": "2026-08-20",
+    "final": "2026-08-27",
+    "pendiente": "Instrucciones de Ensayo"
+  },
+  {
+    "codigo": "PEA-SEA-499 ",
+    "ensayo": "Bilateral Acesco (Barras)",
+    "inicio": "2026-06-17",
+    "fin": "2026-06-18",
+    "preliminar": "2026-07-07",
+    "final": "2026-07-13",
+    "pendiente": "Instrucciones de Ensayo"
+  },
+  {
+    "codigo": "PEA-SEA-498 ",
+    "ensayo": "Bilateral Celsia (Medidores de Energía)",
+    "inicio": "2026-06-19",
+    "fin": "2026-06-23",
+    "preliminar": "2026-07-13",
+    "final": "2026-07-17",
+    "pendiente": "Instrucciones de Ensayo"
+  },
+  {
+    "codigo": "PEA SEA 500 ",
+    "ensayo": "Bilateral Concrelab (Mallas)",
+    "inicio": "2026-06-19",
+    "fin": "2026-06-24",
+    "preliminar": "2026-07-14",
+    "final": "2026-07-21",
+    "pendiente": "Instrucciones de Ensayo"
+  },
+  {
+    "codigo": "PEA-SEA-402 ",
+    "ensayo": "Bilateral SGS Panamá (Masa Unitaria)",
+    "inicio": "2026-06-01",
+    "fin": "2026-06-02",
+    "preliminar": "2026-06-23",
+    "final": "2026-07-03",
     "pendiente": "Informe Preliminar"
+  },
+  {
+    "codigo": "PEA-SCI-043 ",
+    "ensayo": "Bilateral Nyce (Gasodomésticos)",
+    "inicio": "2026-05-14",
+    "fin": "2026-05-19",
+    "preliminar": "2026-06-22",
+    "final": "2026-06-30",
+    "pendiente": "Instrucciones de Ensayo"
+  },
+  {
+    "codigo": "PEA-SCI-043 ",
+    "ensayo": "PEA-SCI-036 / PEA-SCI-037 ",
+    "inicio": "2026-06-03",
+    "fin": "2026-06-04",
+    "preliminar": "2026-06-25",
+    "final": "2026-06-30",
+    "pendiente": "Instrucciones de Ensayo"
+  },
+  {
+    "codigo": "PEA-SEA-492 / 497 ",
+    "ensayo": "Proyecto Ciudad de Panamá",
+    "inicio": "2026-07-08",
+    "fin": "2026-07-14",
+    "preliminar": "2026-08-11",
+    "final": "2026-08-14",
+    "pendiente": "Instrucciones de Ensayo"
+  },
+  {
+    "codigo": "PEA-SEA-416-419",
+    "ensayo": "Ronda Textil",
+    "inicio": "2026-07-16",
+    "fin": "2026-07-22",
+    "preliminar": "2026-08-21",
+    "final": "2026-07-30",
+    "pendiente": "Instrucciones de Ensayo"
   }
 ]
