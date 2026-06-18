@@ -1,11 +1,11 @@
 [
   {
-    "codigo": "PEA-SEA-000",
-    "ensayo": "VVVVV",
-    "inicio": "2026-06-19",
-    "fin": "2026-06-19",
-    "preliminar": "2026-06-19",
-    "final": "2026-06-19",
-    "pendiente": "Informe Final"
+    "codigo": "PRUEBA-EXITOSA",
+    "ensayo": "Verificación del Robot PEAMCO",
+    "inicio": "2026-06-10",
+    "fin": "2026-06-15",
+    "preliminar": "2026-06-20",
+    "final": "2026-06-25",
+    "pendiente": "Aprobación de Ensayos de Aptitud"
   }
 ]
