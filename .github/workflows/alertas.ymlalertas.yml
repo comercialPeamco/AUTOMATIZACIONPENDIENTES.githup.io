@@ -29,7 +29,7 @@ jobs:
         server_port: 465
         username: ${{ secrets.NOTIFICADOR_CORREO }}
         password: ${{ secrets.NOTIFICADOR_CLAVE }}
-        subject: ⚠️ RECORDATORIO COMERCIAL: Alertas Técnicas Ensayos de Aptitud PEAMCO
+        subject: "⚠️ RECORDATORIO COMERCIAL: Alertas Técnicas Ensayos de Aptitud PEAMCO"
         to: comercial@peamco.com.co
         from: Alertas Automatizadas PEAMCO
         body: file://cuerpo_correo.txt
