@@ -6,121 +6,257 @@
     <title>PEAMCO - Panel Visual Comercial</title>
     <style>
         :root {
-            --primary: #0F2C59;
-            --accent: #DAC0A3;
-            --bg: #F8F0E5;
+            --primary: #0000D0; /* Azul Corporativo PEAMCO */
+            --accent: #7045B4;  /* Púrpura Corporativo */
+            --success: #29C819; /* Verde Corporativo */
+            --bg: #F5F7FA;
+            --text-main: #2D3748;
             --white: #FFFFFF;
-            --danger: #D9534F;
-            --warning: #F0AD4E;
-            --success: #5CB85C;
+            --danger: #E53E3E;
+            --warning: #DD6B20;
             --whatsapp: #25D366;
-            --email: #0275D8;
+            --email: #3182CE;
+            --border-color: #E2E8F0;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             background-color: var(--bg);
-            color: #333;
+            color: var(--text-main);
             margin: 0;
-            padding: 20px;
+            padding: 30px 20px;
+            line-height: 1.5;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1280px;
             margin: 0 auto;
         }
 
         header {
-            background-color: var(--primary);
-            color: var(--white);
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-            margin-bottom: 25px;
+            background-color: var(--white);
+            color: var(--text-main);
+            padding: 30px;
+            border-radius: 12px;
+            text-align: left;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border-left: 6px solid var(--primary);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
-        header h1 { margin: 0; font-size: 24px; }
-        header p { margin: 5px 0 0 0; font-size: 14px; opacity: 0.9; }
+        header h1 { 
+            margin: 0; 
+            font-size: 26px; 
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: -0.5px;
+        }
+        header p { 
+            margin: 8px 0 0 0; 
+            font-size: 14px; 
+            color: #718096;
+            font-weight: 500;
+        }
 
         /* SECCIÓN DE ALERTAS VISUALES */
         .alert-section {
-            background-color: #FDF0ED;
-            border: 2px solid var(--danger);
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 25px;
+            background-color: #FFF5F5;
+            border: 1px solid #FED7D7;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px -1px rgba(229, 62, 62, 0.05);
         }
 
-        .alert-section h2 { margin-top: 0; color: var(--danger); font-size: 18px; }
+        .alert-section h2 { 
+            margin-top: 0; 
+            color: var(--danger); 
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
         .alert-card {
             background-color: var(--white);
-            border-left: 5px solid var(--warning);
-            padding: 12px 20px;
-            margin-bottom: 10px;
-            border-radius: 4px;
+            border-left: 4px solid var(--warning);
+            padding: 16px 24px;
+            margin-bottom: 12px;
+            border-radius: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            border-top: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            transition: transform 0.2s;
+        }
+        
+        .alert-card:hover {
+            transform: translateY(-2px);
         }
 
-        .alert-card.vencido { border-left-color: var(--danger); background-color: #FFF5F5; }
+        .alert-card.vencido { 
+            border-left-color: var(--danger); 
+            background-color: #FFF5F5; 
+        }
 
         .alert-buttons { display: flex; gap: 10px; }
 
         .btn-action {
-            padding: 8px 12px;
-            border-radius: 5px;
+            padding: 8px 16px;
+            border-radius: 6px;
             color: var(--white);
             text-decoration: none;
-            font-size: 12px;
-            font-weight: bold;
+            font-size: 13px;
+            font-weight: 600;
             display: inline-flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
+            transition: opacity 0.2s;
         }
+        .btn-action:hover { opacity: 0.9; }
         .btn-mail { background-color: var(--email); }
         .btn-wa { background-color: var(--whatsapp); }
 
         /* DISEÑO DE PANELES */
         .dashboard {
             display: grid;
-            grid-template-columns: 380px 1fr;
-            gap: 25px;
+            grid-template-columns: 400px 1fr;
+            gap: 30px;
         }
 
-        @media (max-width: 900px) { .dashboard { grid-template-columns: 1fr; } }
+        @media (max-width: 1024px) { .dashboard { grid-template-columns: 1fr; } }
 
         .panel {
             background-color: var(--white);
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
+            padding: 26px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+            border: 1px solid var(--border-color);
         }
 
-        .panel h3 { margin-top: 0; color: var(--primary); border-bottom: 2px solid var(--bg); padding-bottom: 10px; }
+        .panel h3 { 
+            margin-top: 0; 
+            color: var(--primary); 
+            font-size: 18px;
+            font-weight: 700;
+            padding-bottom: 12px; 
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
 
-        .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; margin-bottom: 4px; font-size: 12px; font-weight: bold; }
-        .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #CCC; border-radius: 4px; box-sizing: border-box; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { 
+            display: block; 
+            margin-bottom: 6px; 
+            font-size: 13px; 
+            font-weight: 600; 
+            color: #4A5568;
+        }
+        .form-group input, .form-group select { 
+            width: 100%; 
+            padding: 10px 12px; 
+            border: 1px solid var(--border-color); 
+            border-radius: 6px; 
+            box-sizing: border-box; 
+            font-size: 14px;
+            background-color: #FAFAFA;
+            transition: all 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background-color: var(--white);
+            box-shadow: 0 0 0 3px rgba(0, 0, 208, 0.1);
+        }
 
-        .btn-save { background-color: var(--primary); color: var(--white); border: none; padding: 10px; width: 100%; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-save { 
+            background-color: var(--primary); 
+            color: var(--white); 
+            border: none; 
+            padding: 12px; 
+            width: 100%; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        .btn-save:hover { background-color: #0000A0; }
 
-        /* TABLA */
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #EEE; font-size: 13px; }
-        th { background-color: var(--primary); color: var(--white); }
+        /* TABLA ELEGANTE */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+        
+        table { width: 100%; border-collapse: collapse; background-color: var(--white); }
+        th, td { padding: 14px 18px; text-align: left; font-size: 14px; }
+        th { 
+            background-color: #F8FAFC; 
+            color: #4A5568; 
+            font-weight: 700;
+            border-bottom: 2px solid var(--border-color);
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+        }
+        td { border-bottom: 1px solid var(--border-color); color: #4A5568; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background-color: #F8FAFC; }
 
-        .badge { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; color: var(--white); cursor: pointer; }
-        .badge-pending { background-color: var(--warning); color: #333; }
+        .badge { 
+            padding: 6px 12px; 
+            border-radius: 20px; 
+            font-size: 12px; 
+            font-weight: 600; 
+            color: var(--white); 
+            cursor: pointer; 
+            display: inline-block;
+            transition: opacity 0.2s;
+        }
+        .badge:hover { opacity: 0.85; }
+        .badge-pending { background-color: var(--warning); color: var(--white); }
         .badge-success { background-color: var(--success); }
 
-        .btn-delete { background-color: var(--danger); color: var(--white); border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
+        .btn-delete { 
+            background-color: transparent; 
+            color: #A0AEC0; 
+            border: none; 
+            padding: 6px 10px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .btn-delete:hover { 
+            color: var(--danger); 
+            background-color: #FFF5F5;
+        }
 
         /* CAJA JSON GENERADO */
-        textarea { width: 100%; height: 120px; font-family: monospace; font-size: 12px; padding: 10px; box-sizing: border-box; background-color: #F4F4F4; border: 1px solid #CCC; border-radius: 4px; resize: none; }
+        textarea { 
+            width: 100%; 
+            height: 130px; 
+            font-family: 'Courier New', Courier, monospace; 
+            font-size: 12px; 
+            padding: 12px; 
+            box-sizing: border-box; 
+            background-color: #F8FAFC; 
+            border: 1px solid var(--border-color); 
+            border-radius: 6px; 
+            resize: none; 
+            color: #4A5568;
+        }
+        textarea:focus { outline: none; border-color: var(--accent); }
     </style>
 </head>
 <body>
@@ -182,7 +318,7 @@
             <!-- EXPORTADOR PARA EL ROBOT -->
             <div class="panel">
                 <h3>Sincronizar con el Robot de GitHub</h3>
-                <p style="font-size: 11px; color: #666; margin-top: 0;">Copia este texto y pégalo completo dentro de tu archivo <strong>programas.json</strong> en GitHub para que las alertas automáticas al correo funcionen de madrugada:</p>
+                <p style="font-size: 12px; color: #718096; margin-top: 0; margin-bottom: 12px;">Copia este texto y pégalo completo dentro de tu archivo <strong>programas.json</strong> en GitHub para alimentar el robot diario:</p>
                 <textarea id="jsonOutput" readonly onclick="this.select()"></textarea>
             </div>
         </div>
@@ -190,7 +326,7 @@
         <!-- DERECHA: TABLA DE CONTROL -->
         <div class="panel">
             <h3>Base de Datos de Monitoreo</h3>
-            <div style="overflow-x: auto;">
+            <div class="table-container">
                 <table>
                     <thead>
                         <tr>
@@ -242,7 +378,6 @@
     function updateData() {
         localStorage.setItem('peamco_visual_data', JSON.stringify(dataStore));
         
-        // Actualizar la caja JSON para copiar a GitHub
         const cleanJSON = dataStore.map(({codigo, ensayo, inicio, fin, preliminar, final, pendiente}) => 
             ({codigo, ensayo, inicio, fin, preliminar, final, pendiente}));
         document.getElementById('jsonOutput').value = JSON.stringify(cleanJSON, null, 2);
@@ -260,7 +395,6 @@
         let hasAlerts = false;
 
         dataStore.forEach(item => {
-            // Evaluador interno de alertas visuales de 2 días
             const milestones = [
                 { date: item.inicio, name: "Inicio de Ejecución" },
                 { date: item.fin, name: "Fin de Ejecución" },
@@ -282,8 +416,8 @@
                     card.className = `alert-card ${isOverdue ? 'vencido' : ''}`;
                     card.innerHTML = `
                         <div>
-                            <strong>[${item.codigo}] ${item.ensayo}</strong> — ${m.name}<br>
-                            <small style="font-weight:bold;">${isOverdue ? 'VENCIDO HACE ' + Math.abs(days) + ' DÍAS' : (days === 0 ? 'VENCE HOY' : 'FALTAN ' + days + ' DÍAS')}</small>
+                            <strong style="color:var(--primary);">[${item.codigo}] ${item.ensayo}</strong> — ${m.name}<br>
+                            <small style="font-weight:700; color:${isOverdue ? 'var(--danger)' : 'var(--warning)'};">${isOverdue ? 'VENCIDO HACE ' + Math.abs(days) + ' DÍAS' : (days === 0 ? 'VENCE HOY' : 'FALTAN ' + days + ' DÍAS')}</small>
                         </div>
                         <div class="alert-buttons">
                             <a href="${mailHref}" class="btn-action btn-mail">📧 Correo</a>
@@ -294,18 +428,17 @@
                 }
             });
 
-            // Llenar la tabla visual
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td><strong>${item.codigo}</strong><br><span style="color:#666;font-size:11px;">${item.ensayo}</span></td>
-                <td>Inicia: ${item.inicio}<br>Fin: ${item.fin}</td>
-                <td>Preliminar: ${item.preliminar}<br>Final: ${item.final}</td>
+                <td><strong style="color:var(--primary);">${item.codigo}</strong><br><span style="color:#718096;font-size:12px;">${item.ensayo}</span></td>
+                <td><span style="font-size:12px;">Inicia:<b>${item.inicio}</b><br>Fin:<b>${item.fin}</b></span></td>
+                <td><span style="font-size:12px;">Preliminar:<b>${item.preliminar}</b><br>Final:<b>${item.final}</b></span></td>
                 <td>
                     <span class="badge ${item.status === 'Pendiente' ? 'badge-pending' : 'badge-success'}" onclick="toggleStatus(${item.id})">
                         ${item.pendiente}: ${item.status}
                     </span>
                 </td>
-                <td><button class="btn-delete" onclick="deleteItem(${item.id})">❌</button></td>
+                <td><button class="btn-delete" onclick="deleteItem(${item.id})">🗑️</button></td>
             `;
             tableBody.appendChild(row);
         });
@@ -328,7 +461,6 @@
         }
     }
 
-    // Carga inicial
     updateData();
 </script>
 </body>
