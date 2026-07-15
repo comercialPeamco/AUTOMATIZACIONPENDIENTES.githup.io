@@ -42,9 +42,6 @@
             margin-bottom: 30px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
             border-left: 6px solid var(--primary);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
         }
 
         header h1 { 
@@ -60,6 +57,35 @@
             color: #718096;
             font-weight: 500;
         }
+
+        /* CONFIGURACIÓN GITHUB */
+        .config-box {
+            background: #EDF2F7;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px dashed #CBD5E0;
+        }
+        .config-box h4 { margin: 0 0 10px 0; color: #4A5568; }
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+        }
+
+        /* ESTADO DE SINCRONIZACIÓN */
+        .sync-status {
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 13px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .status-idle { background: #E2E8F0; color: #4A5568; }
+        .status-loading { background: #EBF8FF; color: #2B6CB0; }
+        .status-success { background: #C6F6D5; color: #22543D; }
+        .status-error { background: #FED7D7; color: #742A2A; }
 
         /* SECCIÓN DE ALERTAS VISUALES */
         .alert-section {
@@ -97,15 +123,8 @@
             transition: transform 0.2s;
         }
         
-        .alert-card:hover {
-            transform: translateY(-2px);
-        }
-
-        .alert-card.vencido { 
-            border-left-color: var(--danger); 
-            background-color: #FFF5F5; 
-        }
-
+        .alert-card:hover { transform: translateY(-2px); }
+        .alert-card.vencido { border-left-color: var(--danger); background-color: #FFF5F5; }
         .alert-buttons { display: flex; gap: 10px; }
 
         .btn-action {
@@ -118,7 +137,6 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            transition: opacity 0.2s;
         }
         .btn-action:hover { opacity: 0.9; }
         .btn-mail { background-color: var(--email); }
@@ -168,7 +186,6 @@
             box-sizing: border-box; 
             font-size: 14px;
             background-color: #FAFAFA;
-            transition: all 0.2s;
         }
         .form-group input:focus, .form-group select:focus {
             outline: none;
@@ -187,7 +204,6 @@
             cursor: pointer; 
             font-weight: 600; 
             font-size: 14px;
-            transition: background-color 0.2s;
         }
         .btn-save:hover { background-color: #0000A0; }
 
@@ -210,7 +226,6 @@
             letter-spacing: 0.5px;
         }
         td { border-bottom: 1px solid var(--border-color); color: #4A5568; }
-        tr:last-child td { border-bottom: none; }
         tr:hover td { background-color: #F8FAFC; }
 
         .badge { 
@@ -221,10 +236,8 @@
             color: var(--white); 
             cursor: pointer; 
             display: inline-block;
-            transition: opacity 0.2s;
         }
-        .badge:hover { opacity: 0.85; }
-        .badge-pending { background-color: var(--warning); color: var(--white); }
+        .badge-pending { background-color: var(--warning); }
         .badge-success { background-color: var(--success); }
 
         .btn-delete { 
@@ -235,28 +248,11 @@
             border-radius: 6px; 
             cursor: pointer; 
             font-size: 14px;
-            transition: all 0.2s;
         }
         .btn-delete:hover { 
             color: var(--danger); 
             background-color: #FFF5F5;
         }
-
-        /* CAJA JSON GENERADO */
-        textarea { 
-            width: 100%; 
-            height: 130px; 
-            font-family: 'Courier New', Courier, monospace; 
-            font-size: 12px; 
-            padding: 12px; 
-            box-sizing: border-box; 
-            background-color: #F8FAFC; 
-            border: 1px solid var(--border-color); 
-            border-radius: 6px; 
-            resize: none; 
-            color: #4A5568;
-        }
-        textarea:focus { outline: none; border-color: var(--accent); }
     </style>
 </head>
 <body>
@@ -264,8 +260,35 @@
 <div class="container">
     <header>
         <h1>PEAMCO S.A.S. — Panel Comercial del Área Técnica</h1>
-        <p>Seguimiento Visual de Ensayos y Alertas de 2 Días</p>
+        <p>Seguimiento Visual de Ensayos y Alertas Sincronizadas Directamente con GitHub</p>
     </header>
+
+    <!-- CONFIGURACIÓN DE CONEXIÓN CON GITHUB -->
+    <div class="config-box">
+        <h4>🔗 Configuración de Sincronización con GitHub Robot</h4>
+        <div class="config-grid">
+            <div class="form-group" style="margin-bottom:0;">
+                <label style="font-size:11px;">Usuario o Organización de GitHub:</label>
+                <input type="text" id="gh_owner" placeholder="ej: comercialPeamco" style="padding:6px; font-size:12px;">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+                <label style="font-size:11px;">Nombre del Repositorio:</label>
+                <input type="text" id="gh_repo" placeholder="ej: AUTOMATIZACIONPENDIENTES.github.io" style="padding:6px; font-size:12px;">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+                <label style="font-size:11px;">Rama (Branch):</label>
+                <input type="text" id="gh_branch" value="main" style="padding:6px; font-size:12px;">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+                <label style="font-size:11px;">Token de GitHub (PAT):</label>
+                <input type="password" id="gh_token" placeholder="Pega aquí tu token ghp_..." style="padding:6px; font-size:12px;">
+            </div>
+        </div>
+        <p style="font-size: 11px; color: #718096; margin: 8px 0 0 0;">⚠️ Estos datos de acceso se quedan guardados de forma 100% privada en la memoria de tu navegador actual.</p>
+    </div>
+
+    <!-- ESTADO DE SINCRONIZACIÓN -->
+    <div id="sync-status" class="sync-status status-idle">Sincronización lista (esperando cambios)</div>
 
     <!-- ALERTAS EN PANTALLA (2 DÍAS ANTES) -->
     <div id="alert-section" class="alert-section" style="display: none;">
@@ -311,15 +334,8 @@
                             <option value="Informe Final">Informe Final</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn-save">Agregar a la Lista</button>
+                    <button type="submit" class="btn-save">Agregar y Sincronizar</button>
                 </form>
-            </div>
-
-            <!-- EXPORTADOR PARA EL ROBOT -->
-            <div class="panel">
-                <h3>Sincronizar con el Robot de GitHub</h3>
-                <p style="font-size: 12px; color: #718096; margin-top: 0; margin-bottom: 12px;">Copia este texto y pégalo completo dentro de tu archivo <strong>programas.json</strong> en GitHub para alimentar el robot diario:</p>
-                <textarea id="jsonOutput" readonly onclick="this.select()"></textarea>
             </div>
         </div>
 
@@ -348,6 +364,19 @@
     const CONFIG = { correo: "comercial@peamco.com.co", waNum: "573185263597" };
     let dataStore = JSON.parse(localStorage.getItem('peamco_visual_data')) || [];
 
+    // Cargar credenciales guardadas de GitHub al iniciar
+    document.getElementById('gh_owner').value = localStorage.getItem('gh_owner') || '';
+    document.getElementById('gh_repo').value = localStorage.getItem('gh_repo') || '';
+    document.getElementById('gh_branch').value = localStorage.getItem('gh_branch') || 'main';
+    document.getElementById('gh_token').value = localStorage.getItem('gh_token') || '';
+
+    // Guardar credenciales de GitHub al cambiarlas
+    ['gh_owner', 'gh_repo', 'gh_branch', 'gh_token'].forEach(id => {
+        document.getElementById(id).addEventListener('input', function() {
+            localStorage.setItem(id, this.value);
+        });
+    });
+
     document.getElementById('programForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
@@ -375,14 +404,82 @@
         return Math.ceil((target - today) / (1000 * 60 * 60 * 24));
     }
 
+    function showStatus(text, type) {
+        const statusDiv = document.getElementById('sync-status');
+        statusDiv.className = `sync-status status-${type}`;
+        statusDiv.innerText = text;
+    }
+
     function updateData() {
         localStorage.setItem('peamco_visual_data', JSON.stringify(dataStore));
-        
+        render();
+
         const cleanJSON = dataStore.map(({codigo, ensayo, inicio, fin, preliminar, final, pendiente}) => 
             ({codigo, ensayo, inicio, fin, preliminar, final, pendiente}));
-        document.getElementById('jsonOutput').value = JSON.stringify(cleanJSON, null, 2);
 
-        render();
+        // Iniciar la sincronización automática con GitHub
+        syncToGitHub(cleanJSON);
+    }
+
+    async function syncToGitHub(cleanJSON) {
+        const owner = localStorage.getItem('gh_owner');
+        const repo = localStorage.getItem('gh_repo');
+        const branch = localStorage.getItem('gh_branch') || 'main';
+        const token = localStorage.getItem('gh_token');
+        const path = 'programas.json';
+
+        if (!owner || !repo || !token) {
+            showStatus("⚠️ Datos guardados localmente. Configura tus datos de GitHub arriba para sincronizar el robot de forma automática.", "error");
+            return;
+        }
+
+        showStatus("🔄 Subiendo cambios a GitHub de forma segura...", "loading");
+
+        try {
+            const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`;
+            let sha = "";
+
+            // 1. Intentar obtener el archivo para conseguir su hash (sha) necesario para actualizarlo
+            const resGet = await fetch(url, {
+                headers: { "Authorization": `token ${token}` }
+            });
+
+            if (resGet.status === 200) {
+                const fileData = await resGet.json();
+                sha = fileData.sha;
+            } else if (resGet.status !== 404) {
+                throw new Error("No se pudo conectar a GitHub o el repositorio no existe.");
+            }
+
+            // 2. Subir (Commit) el nuevo archivo programas.json
+            const jsonString = JSON.stringify(cleanJSON, null, 2);
+            const contentBase64 = btoa(unescape(encodeURIComponent(jsonString)));
+
+            const resPut = await fetch(url, {
+                method: "PUT",
+                headers: {
+                    "Authorization": `token ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    message: "Actualización automática de programas.json [Panel Web]",
+                    content: contentBase64,
+                    sha: sha || undefined,
+                    branch: branch
+                })
+            });
+
+            if (resPut.ok) {
+                showStatus("✅ ¡Cambios subidos a GitHub con éxito! El robot se ejecutará de forma automática.", "success");
+            } else {
+                const errJson = await resPut.json();
+                throw new Error(errJson.message || "Error al subir cambios.");
+            }
+
+        } catch (error) {
+            console.error(error);
+            showStatus(`❌ Error de sincronización: ${error.message}`, "error");
+        }
     }
 
     function render() {
@@ -461,7 +558,7 @@
         }
     }
 
-    updateData();
+    render();
 </script>
 </body>
 </html>
