@@ -375,6 +375,25 @@
             padding: 10px 0;
             border-bottom: 1px solid var(--border-color);
         }
+
+        /* DISEÑO COMPLEMENTARIO BOTÓN VOZ */
+        .btn-voice {
+            background-color: var(--accent);
+            color: var(--white);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            margin-top: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            width: auto;
+            transition: background 0.2s;
+        }
+        .btn-voice:hover { background-color: #553395; }
     </style>
 </head>
 <body>
@@ -383,6 +402,10 @@
     <header>
         <h1>PEAMCO S.A.S. — Panel Comercial con Calendario Interactivo</h1>
         <p>Monitoreo Automático de Ensayos, Bitácora de Pendientes y Sincronización en Tiempo Real con GitHub</p>
+        <!-- BOTÓN DE LECTURA DE VOZ -->
+        <button id="btn-audio-pendientes" onclick="leerPendientesEnVozAlta()" class="btn-voice">
+            🔊 Leer mis pendientes en voz alta
+        </button>
     </header>
 
     <!-- CONFIGURACIÓN DE CONEXIÓN CON GITHUB -->
@@ -660,7 +683,7 @@
         const body = `Estimado Equipo Comercial y Técnico,\n\n` +
             `Se ha generado un recordatorio automático sobre el estado de entrega para el siguiente ensayo:\n\n` +
             `========================================================================\n` +
-            `             REPORTE DE ESTADO DE ENSAYOS - PEAMCO S.A.S.              \n` +
+            `               REPORTE DE ESTADO DE ENSAYOS - PEAMCO S.A.S.              \n` +
             `========================================================================\n` +
             `  PROPIEDAD             |  DETALLES                                     \n` +
             `------------------------|-----------------------------------------------\n` +
@@ -760,6 +783,74 @@
         }
     }
 
+    // LÓGICA AGREGADA: LEER PENDIENTES EN VOZ ALTA
+    function leerPendientesEnVozAlta() {
+        if (!('speechSynthesis' in window)) {
+            alert("Tu navegador no soporta la reproducción de voz. Intenta con Chrome o Edge.");
+            return;
+        }
+
+        const boton = document.getElementById('btn-audio-pendientes');
+
+        // Si ya está hablando, detener la voz inmediatamente (Función de Apagado/Pausa)
+        if (window.speechSynthesis.speaking) {
+            window.speechSynthesis.cancel();
+            boton.innerText = "🔊 Leer mis pendientes en voz alta";
+            boton.style.backgroundColor = "var(--accent)";
+            return;
+        }
+
+        let textoALeer = "Reporte de pendientes para PEAMCO S.A.S. ";
+
+        // Procesar programas de ensayo
+        if (masterData.programs.length === 0) {
+            textoALeer += "No hay programas de ensayo registrados. ";
+        } else {
+            textoALeer += `Tienes ${masterData.programs.length} programas de ensayo. `;
+            masterData.programs.forEach((item, index) => {
+                textoALeer += `Ensayo número ${index + 1}: Código ${item.codigo}, ${item.ensayo}. El entregable técnico pendiente es ${item.pendiente}. `;
+            });
+        }
+
+        // Procesar bitácora de tareas libres
+        if (masterData.notes.length === 0) {
+            textoALeer += "No hay tareas adicionales en la bitácora.";
+        } else {
+            textoALeer += `En la bitácora cuentas con ${masterData.notes.length} tareas pendientes. `;
+            masterData.notes.forEach((note, index) => {
+                textoALeer += `Tarea número ${index + 1}: Titulada ${note.title}. Detalles: ${note.desc}. `;
+            });
+        }
+
+        const utterance = new SpeechSynthesisUtterance(textoALeer);
+        utterance.lang = 'es-ES'; // Forzar idioma español
+        utterance.rate = 0.95;    // Velocidad ligeramente natural
+        utterance.pitch = 1.0;   
+
+        // Intentar capturar una voz en español del navegador
+        const voces = window.speechSynthesis.getVoices();
+        const vozEspanol = voces.find(v => v.lang.startsWith('es'));
+        if (vozEspanol) utterance.voice = vozEspanol;
+
+        // Cambiar estados visuales del botón durante la lectura
+        utterance.onstart = () => {
+            boton.innerText = "⏹️ Detener lectura de voz";
+            boton.style.backgroundColor = "var(--danger)";
+        };
+
+        utterance.onend = () => {
+            boton.innerText = "🔊 Leer mis pendientes en voz alta";
+            boton.style.backgroundColor = "var(--accent)";
+        };
+
+        utterance.onerror = () => {
+            boton.innerText = "🔊 Leer mis pendientes en voz alta";
+            boton.style.backgroundColor = "var(--accent)";
+        };
+
+        window.speechSynthesis.speak(utterance);
+    }
+
     // RENDERIZAR TODO EL DASHBOARD Y EL CALENDARIO
     function render() {
         const grid = document.getElementById('calendar-grid');
@@ -815,147 +906,103 @@
                 cell.classList.add('today');
             }
 
+            cell.innerHTML = `<span class="calendar-date-num">${day}</span>`;
             cell.onclick = () => openModalForDay(dateStr);
 
-            // Buscar si hay eventos ese día para pintar los puntos de color
             const events = getEventsForDate(dateStr);
-            let dotsHtml = '<div class="dots-container">';
-            let addedProgDot = false;
-            let addedNoteDot = false;
+            if (events.length > 0) {
+                const dotsContainer = document.createElement('div');
+                dotsContainer.className = 'dots-container';
+                events.forEach(ev => {
+                    const dot = document.createElement('span');
+                    dot.className = `dot dot-${ev.type}`;
+                    dotsContainer.appendChild(dot);
+                });
+                cell.appendChild(dotsContainer);
+            }
 
-            events.forEach(ev => {
-                if (ev.type === 'program' && !addedProgDot) {
-                    dotsHtml += '<span class="dot dot-program"></span>';
-                    addedProgDot = true;
-                }
-                if (ev.type === 'note' && !addedNoteDot) {
-                    dotsHtml += '<span class="dot dot-note"></span>';
-                    addedNoteDot = true;
-                }
-            });
-            dotsHtml += '</div>';
-
-            cell.innerHTML = `
-                <span class="calendar-date-num">${day}</span>
-                ${dotsHtml}
-            `;
             grid.appendChild(cell);
         }
 
-        // 2. RENDERIZAR SECCIÓN DE ALERTAS ACTIVAS (Vencen en <= 2 días)
+        // Procesar Alertas Críticas de Ensayos (Faltan 2 días o vencido)
         masterData.programs.forEach(item => {
-            const milestones = [
-                { date: item.inicio, name: "Inicio de Ejecución" },
-                { date: item.fin, name: "Fin de Ejecución" },
-                { date: item.preliminar, name: "Informe Preliminar" },
-                { date: item.final, name: "Informe Final" }
+            const fechasEvaluables = [
+                { name: "Fin Ejecución", date: item.fin },
+                { name: "Entrega Preliminar", date: item.preliminar },
+                { name: "Entrega Final", date: item.final }
             ];
 
-            milestones.forEach(m => {
-                const days = daysRemaining(m.date);
-                if (days <= 2 && days >= -7 && item.status === "Pendiente") {
+            fechasEvaluables.forEach(f => {
+                const rem = daysRemaining(f.date);
+                if (rem <= 2) {
                     hasAlerts = true;
-                    const isOverdue = days < 0;
-                    const daysText = isOverdue ? 'Vencido hace ' + Math.abs(days) + ' días' : (days === 0 ? 'Vence HOY' : 'Faltan ' + days + ' días');
-                    
-                    const waMsg = `*ALERTA PEAMCO*\n\n• *Código:* ${item.codigo}\n• *Ensayo:* ${item.ensayo}\n• *Hito:* ${m.name}\n• *Fecha Límite:* ${m.date} (${daysText.toUpperCase()})`;
-                    const mailHref = buildCustomEmail(item, m.name, m.date, daysText);
+                    const alertCard = document.createElement('div');
+                    alertCard.className = `alert-card ${rem < 0 ? 'vencido' : ''}`;
+
+                    const daysText = rem < 0 ? `🚨 VENCIDO hace ${Math.abs(rem)} días` : (rem === 0 ? `⚠️ VENCE HOY` : `⏳ Faltan ${rem} días`);
+                    const mailHref = buildCustomEmail(item, f.name, f.date, daysText);
+                    const waMsg = `*ALERTA CRÍTICA PEAMCO*\n\n• *Código:* ${item.codigo}\n• *Ensayo:* ${item.ensayo}\n• *Evento:* ${f.name}\n• *Estado:* ${daysText.toUpperCase()}`;
                     const waHref = `https://wa.me/${CONFIG.waNum}?text=${encodeURIComponent(waMsg)}`;
 
-                    const card = document.createElement('div');
-                    card.className = `alert-card ${isOverdue ? 'vencido' : ''}`;
-                    card.innerHTML = `
+                    alertCard.innerHTML = `
                         <div>
-                            <strong style="color:var(--primary);">[${item.codigo}] ${item.ensayo}</strong> — ${m.name}<br>
-                            <small style="font-weight:700; color:${isOverdue ? 'var(--danger)' : 'var(--warning)'};">${daysText.toUpperCase()}</small>
+                            <strong>[${item.codigo}] ${item.ensayo}</strong> — <span style="color:var(--danger); font-weight:bold;">${f.name}</span><br>
+                            <small>Fecha Límite: ${f.date} (${daysText}) | Pendiente: <b>${item.pendiente}</b></small>
                         </div>
                         <div class="alert-buttons">
-                            <a href="${mailHref}" class="btn-action btn-mail">📧 Enviar Tabla</a>
+                            <a href="${mailHref}" class="btn-action btn-mail">📧 Enviar Alerta</a>
                             <a href="${waHref}" target="_blank" class="btn-action btn-wa">📲 WhatsApp</a>
                         </div>
                     `;
-                    alertContainer.appendChild(card);
+                    alertContainer.appendChild(alertCard);
                 }
             });
-
-            // Elemento en la lista compacta
-            const listItem = document.createElement('div');
-            listItem.className = 'compact-list-item';
-            listItem.innerHTML = `
-                <div>
-                    <strong>[${item.codigo}] ${item.ensayo}</strong><br>
-                    <small style="color:#718096;">Entregable: <b>${item.pendiente}</b> | Estado: <span style="cursor:pointer; color:var(--primary); font-weight:bold;" onclick="toggleStatus(${item.id})">${item.status}</span></small>
-                </div>
-                <button class="close-modal" onclick="deleteItem(${item.id})" style="font-size:16px;">🗑️</button>
-            `;
-            elementsList.appendChild(listItem);
         });
 
-        masterData.notes.forEach(note => {
-            const days = daysRemaining(note.deadline);
-            if (days <= 2 && days >= -7) {
-                hasAlerts = true;
-                const isOverdue = days < 0;
-                const daysText = isOverdue ? 'Vencido hace ' + Math.abs(days) + ' días' : (days === 0 ? 'Vence HOY' : 'Faltan ' + days + ' días');
+        alertSection.style.display = hasAlerts ? "block" : "none";
 
-                const mailHref = `mailto:${CONFIG.correo}?subject=${encodeURIComponent('AVISO: ' + note.title)}&body=${encodeURIComponent(note.desc)}`;
-                const waHref = `https://wa.me/${CONFIG.waNum}?text=${encodeURIComponent('*PENDIENTE PEAMCO*\n\n' + note.title + '\n' + note.desc)}`;
-
-                const card = document.createElement('div');
-                card.className = `alert-card ${isOverdue ? 'vencido' : ''}`;
-                card.style.borderLeftColor = "var(--accent)";
-                card.innerHTML = `
-                    <div>
-                        <strong style="color:var(--accent);">📌 [Pendiente] ${note.title}</strong><br>
-                        <span style="font-size:12px; color:#4A5568;">${note.desc}</span><br>
-                        <small style="font-weight:700; color:var(--danger);">${daysText.toUpperCase()}</small>
-                    </div>
-                    <div class="alert-buttons">
-                        <a href="${mailHref}" class="btn-action btn-mail" style="background-color: var(--accent);">📧 Correo</a>
-                        <a href="${waHref}" target="_blank" class="btn-action btn-wa">📲 WhatsApp</a>
-                    </div>
+        // Renderizar la lista compacta inferior de borrado
+        if(masterData.programs.length === 0 && masterData.notes.length === 0) {
+            elementsList.innerHTML = `<p style="color:#718096; text-align:center; font-size:13px;">No hay datos registrados aún.</p>`;
+        } else {
+            masterData.programs.forEach(p => {
+                const item = document.createElement('div');
+                item.className = 'compact-list-item';
+                item.innerHTML = `
+                    <span style="font-size:13px;">🔵 <b>[Ensayo]</b> ${p.codigo} - ${p.ensayo}</span>
+                    <button class="btn-action btn-mail" style="background-color:var(--danger); padding:4px 10px; font-size:11px;" onclick="eliminarElemento('programs', ${p.id})">Eliminar</button>
                 `;
-                alertContainer.appendChild(card);
-            }
+                elementsList.appendChild(item);
+            });
 
-            const listItem = document.createElement('div');
-            listItem.className = 'compact-list-item';
-            listItem.innerHTML = `
-                <div>
-                    <strong style="color:var(--accent);">📌 ${note.title}</strong><br>
-                    <small style="color:#718096;">Detalles: ${note.desc} | Límite: <b>${note.deadline}</b></small>
-                </div>
-                <button class="close-modal" onclick="deleteNote(${note.id})" style="font-size:16px;">🗑️</button>
-            `;
-            elementsList.appendChild(listItem);
-        });
-
-        alertSection.style.display = hasAlerts ? 'block' : 'none';
+            masterData.notes.forEach(n => {
+                const item = document.createElement('div');
+                item.className = 'compact-list-item';
+                item.innerHTML = `
+                    <span style="font-size:13px;">🟣 <b>[Bitácora]</b> ${n.title}</span>
+                    <button class="btn-action btn-mail" style="background-color:var(--danger); padding:4px 10px; font-size:11px;" onclick="eliminarElemento('notes', ${n.id})">Eliminar</button>
+                `;
+                elementsList.appendChild(item);
+            });
+        }
     }
 
-    function toggleStatus(id) {
-        masterData.programs = masterData.programs.map(item => {
-            if (item.id === id) item.status = item.status === "Pendiente" ? "Entregado" : "Pendiente";
-            return item;
-        });
-        updateData();
-    }
-
-    function deleteItem(id) {
-        if (confirm("¿Eliminar este programa de ensayo de la base de datos?")) {
-            masterData.programs = masterData.programs.filter(item => item.id !== id);
+    function eliminarElemento(arrayName, id) {
+        if(confirm("¿Seguro que deseas eliminar este registro?")) {
+            masterData[arrayName] = masterData[arrayName].filter(el => el.id !== id);
             updateData();
         }
     }
 
-    function deleteNote(id) {
-        if (confirm("¿Completaste esta tarea? Se eliminará del calendario.")) {
-            masterData.notes = masterData.notes.filter(note => note.id !== id);
-            updateData();
+    // Inicializar la carga visual
+    window.onload = () => {
+        render();
+        // Carga inicial de voces de forma asíncrona para navegadores basados en Chromium
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.getVoices();
         }
-    }
-
-    render();
+    };
 </script>
+
 </body>
 </html>
