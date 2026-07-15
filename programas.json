@@ -1,11 +1,11 @@
-[
-  {
-    "codigo": "PEA-SEA-000",
-    "ensayo": "Bilateral Barras",
-    "inicio": "2026-07-22",
-    "fin": "2026-07-03",
-    "preliminar": "2026-07-09",
-    "final": "2026-07-09",
-    "pendiente": "Instrucciones de Ensayo"
-  }
-]
+{
+  "programs": [],
+  "notes": [
+    {
+      "id": 1784144154404,
+      "title": "rr",
+      "desc": "rr",
+      "deadline": "2026-07-16"
+    }
+  ]
+}
