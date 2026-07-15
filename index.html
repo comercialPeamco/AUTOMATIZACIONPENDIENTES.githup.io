@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PEAMCO - Panel Visual Comercial</title>
+    <title>PEAMCO - Panel Comercial con Calendario Interactivo</title>
     <style>
         :root {
             --primary: #0000D0; /* Azul Corporativo PEAMCO */
@@ -137,15 +137,17 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            cursor: pointer;
+            border: none;
         }
         .btn-action:hover { opacity: 0.9; }
         .btn-mail { background-color: var(--email); }
         .btn-wa { background-color: var(--whatsapp); }
 
-        /* DISEÑO DE PANELES */
+        /* DISEÑO DE PANELES (Dos columnas) */
         .dashboard {
             display: grid;
-            grid-template-columns: 400px 1fr;
+            grid-template-columns: 380px 1fr;
             gap: 30px;
         }
 
@@ -178,7 +180,7 @@
             font-weight: 600; 
             color: #4A5568;
         }
-        .form-group input, .form-group select { 
+        .form-group input, .form-group select, .form-group textarea { 
             width: 100%; 
             padding: 10px 12px; 
             border: 1px solid var(--border-color); 
@@ -186,8 +188,9 @@
             box-sizing: border-box; 
             font-size: 14px;
             background-color: #FAFAFA;
+            font-family: inherit;
         }
-        .form-group input:focus, .form-group select:focus {
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
             outline: none;
             border-color: var(--primary);
             background-color: var(--white);
@@ -204,54 +207,173 @@
             cursor: pointer; 
             font-weight: 600; 
             font-size: 14px;
+            margin-bottom: 10px;
         }
         .btn-save:hover { background-color: #0000A0; }
 
-        /* TABLA ELEGANTE */
-        .table-container {
-            overflow-x: auto;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-        }
-        
-        table { width: 100%; border-collapse: collapse; background-color: var(--white); }
-        th, td { padding: 14px 18px; text-align: left; font-size: 14px; }
-        th { 
-            background-color: #F8FAFC; 
-            color: #4A5568; 
-            font-weight: 700;
-            border-bottom: 2px solid var(--border-color);
-            text-transform: uppercase;
-            font-size: 11px;
-            letter-spacing: 0.5px;
-        }
-        td { border-bottom: 1px solid var(--border-color); color: #4A5568; }
-        tr:hover td { background-color: #F8FAFC; }
+        .btn-secondary { background-color: var(--accent); }
+        .btn-secondary:hover { background-color: #553395; }
 
-        .badge { 
-            padding: 6px 12px; 
-            border-radius: 20px; 
-            font-size: 12px; 
-            font-weight: 600; 
-            color: var(--white); 
-            cursor: pointer; 
+        /* CALENDARIO INTERACTIVO */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .calendar-header h4 {
+            margin: 0;
+            font-size: 18px;
+            color: var(--primary);
+            font-weight: bold;
+        }
+        .calendar-btn {
+            background-color: var(--primary);
+            color: var(--white);
+            border: none;
+            border-radius: 5px;
+            padding: 5px 12px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .calendar-btn:hover { background-color: #0000A0; }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            text-align: center;
+        }
+        .calendar-day-name {
+            font-size: 11px;
+            font-weight: bold;
+            color: #718096;
+            text-transform: uppercase;
+            padding-bottom: 5px;
+        }
+        .calendar-cell {
+            background: #F8FAFC;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            min-height: 70px;
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: flex-end;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .calendar-cell:hover {
+            background-color: #EBF8FF;
+            transform: scale(1.03);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .calendar-cell.today {
+            border: 2px solid var(--primary);
+            background: #EBF8FF;
+        }
+        .calendar-cell.other-month {
+            opacity: 0.4;
+            cursor: default;
+        }
+        .calendar-cell.other-month:hover {
+            background: #F8FAFC;
+            transform: none;
+            box-shadow: none;
+        }
+        .calendar-date-num {
+            font-size: 13px;
+            font-weight: bold;
+            color: #4A5568;
+        }
+        .dots-container {
+            display: flex;
+            gap: 4px;
+            width: 100%;
+            justify-content: flex-start;
+        }
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
             display: inline-block;
         }
-        .badge-pending { background-color: var(--warning); }
-        .badge-success { background-color: var(--success); }
+        .dot-program { background-color: var(--primary); }
+        .dot-note { background-color: var(--accent); }
 
-        .btn-delete { 
-            background-color: transparent; 
-            color: #A0AEC0; 
-            border: none; 
-            padding: 6px 10px; 
-            border-radius: 6px; 
-            cursor: pointer; 
-            font-size: 14px;
+        /* VENTANA EMERGENTE (MODAL INTERACTIVO CON ANIMACIÓN) */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
-        .btn-delete:hover { 
-            color: var(--danger); 
-            background-color: #FFF5F5;
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+        .modal-content {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            transform: scale(0.8);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .modal-header h4 {
+            margin: 0;
+            color: var(--primary);
+            font-size: 18px;
+        }
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #A0AEC0;
+        }
+        .close-modal:hover { color: var(--danger); }
+        .modal-body {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .modal-item {
+            background: #F8FAFC;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        /* LISTA CON BOTONES COMPACTA */
+        .compact-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
         }
     </style>
 </head>
@@ -259,8 +381,8 @@
 
 <div class="container">
     <header>
-        <h1>PEAMCO S.A.S. — Panel Comercial del Área Técnica</h1>
-        <p>Seguimiento Visual de Ensayos y Alertas Sincronizadas Directamente con GitHub</p>
+        <h1>PEAMCO S.A.S. — Panel Comercial con Calendario Interactivo</h1>
+        <p>Monitoreo Automático de Ensayos, Bitácora de Pendientes y Sincronización en Tiempo Real con GitHub</p>
     </header>
 
     <!-- CONFIGURACIÓN DE CONEXIÓN CON GITHUB -->
@@ -268,12 +390,12 @@
         <h4>🔗 Configuración de Sincronización con GitHub Robot</h4>
         <div class="config-grid">
             <div class="form-group" style="margin-bottom:0;">
-                <label style="font-size:11px;">Usuario o Organización de GitHub:</label>
+                <label style="font-size:11px;">Usuario de GitHub:</label>
                 <input type="text" id="gh_owner" placeholder="ej: comercialPeamco" style="padding:6px; font-size:12px;">
             </div>
             <div class="form-group" style="margin-bottom:0;">
                 <label style="font-size:11px;">Nombre del Repositorio:</label>
-                <input type="text" id="gh_repo" placeholder="ej: AUTOMATIZACIONPENDIENTES.github.io" style="padding:6px; font-size:12px;">
+                <input type="text" id="gh_repo" placeholder="ej: AUTOMATIZACIONPENDIENTES" style="padding:6px; font-size:12px;">
             </div>
             <div class="form-group" style="margin-bottom:0;">
                 <label style="font-size:11px;">Rama (Branch):</label>
@@ -284,7 +406,6 @@
                 <input type="password" id="gh_token" placeholder="Pega aquí tu token ghp_..." style="padding:6px; font-size:12px;">
             </div>
         </div>
-        <p style="font-size: 11px; color: #718096; margin: 8px 0 0 0;">⚠️ Estos datos de acceso se quedan guardados de forma 100% privada en la memoria de tu navegador actual.</p>
     </div>
 
     <!-- ESTADO DE SINCRONIZACIÓN -->
@@ -297,10 +418,11 @@
     </div>
 
     <div class="dashboard">
-        <!-- IZQUIERDA: FORMULARIO -->
+        <!-- IZQUIERDA: FORMULARIOS -->
         <div>
+            <!-- FORMULARIO 1: ENSAYOS -->
             <div class="panel">
-                <h3>Registrar Programa</h3>
+                <h3>Registrar Programa de Ensayo</h3>
                 <form id="programForm">
                     <div class="form-group">
                         <label>Código del Programa:</label>
@@ -334,35 +456,77 @@
                             <option value="Informe Final">Informe Final</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn-save">Agregar y Sincronizar</button>
+                    <button type="submit" class="btn-save">Agregar Programa</button>
+                </form>
+            </div>
+
+            <!-- FORMULARIO 2: PENDIENTES LIBRES -->
+            <div class="panel">
+                <h3>Anotar Otro Pendiente (Bitácora)</h3>
+                <form id="noteForm">
+                    <div class="form-group">
+                        <label>Título del Pendiente:</label>
+                        <input type="text" id="note-title" placeholder="Ej: Llamar a Tecnisuelos" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción / Detalles:</label>
+                        <textarea id="note-desc" rows="3" placeholder="Ej: Solicitar confirmación..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha Límite:</label>
+                        <input type="date" id="note-deadline" required>
+                    </div>
+                    <button type="submit" class="btn-save btn-secondary">Registrar Tarea</button>
                 </form>
             </div>
         </div>
 
-        <!-- DERECHA: TABLA DE CONTROL -->
-        <div class="panel">
-            <h3>Base de Datos de Monitoreo</h3>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Programa / Ensayo</th>
-                            <th>Ejecución</th>
-                            <th>Informes</th>
-                            <th>Pendiente Técnica</th>
-                            <th>Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody id="table-entries"></tbody>
-                </table>
+        <!-- DERECHA: CALENDARIO INTERACTIVO -->
+        <div>
+            <div class="panel">
+                <div class="calendar-header">
+                    <button class="calendar-btn" onclick="changeMonth(-1)">« Anterior</button>
+                    <h4 id="calendar-month-year">Julio 2026</h4>
+                    <button class="calendar-btn" onclick="changeMonth(1)">Siguiente »</button>
+                </div>
+                <div class="calendar-grid" id="calendar-grid">
+                    <!-- Dinámico -->
+                </div>
             </div>
+
+            <!-- LISTADO COMPACTO DE EDICIÓN/ELIMINACIÓN -->
+            <div class="panel">
+                <h3>📋 Lista de Elementos Registrados</h3>
+                <div id="elements-list">
+                    <!-- Dinámico -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- VENTANA EMERGENTE (MODAL) -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4 id="modal-date-title">Detalle del Día</h4>
+            <button class="close-modal" onclick="closeModalDirect()">&times;</button>
+        </div>
+        <div class="modal-body" id="modal-body-content">
+            <!-- Dinámico -->
         </div>
     </div>
 </div>
 
 <script>
     const CONFIG = { correo: "comercial@peamco.com.co", waNum: "573185263597" };
-    let dataStore = JSON.parse(localStorage.getItem('peamco_visual_data')) || [];
+    
+    let masterData = JSON.parse(localStorage.getItem('peamco_master_data')) || {
+        programs: [],
+        notes: []
+    };
+
+    let currentCalendarDate = new Date(); // Mes por defecto del calendario (hoy)
 
     // Cargar credenciales guardadas de GitHub al iniciar
     document.getElementById('gh_owner').value = localStorage.getItem('gh_owner') || '';
@@ -377,9 +541,9 @@
         });
     });
 
+    // Guardar programa
     document.getElementById('programForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        
         const entry = {
             id: Date.now(),
             codigo: document.getElementById('codigo').value,
@@ -391,34 +555,29 @@
             pendiente: document.getElementById('pendiente').value,
             status: "Pendiente"
         };
-
-        dataStore.push(entry);
+        masterData.programs.push(entry);
         updateData();
         this.reset();
     });
 
-    function daysRemaining(targetDate) {
-        const today = new Date();
-        today.setHours(0,0,0,0);
-        const target = new Date(targetDate + "T00:00:00");
-        return Math.ceil((target - today) / (1000 * 60 * 60 * 24));
-    }
-
-    function showStatus(text, type) {
-        const statusDiv = document.getElementById('sync-status');
-        statusDiv.className = `sync-status status-${type}`;
-        statusDiv.innerText = text;
-    }
+    // Guardar nota/tarea libre
+    document.getElementById('noteForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const entry = {
+            id: Date.now(),
+            title: document.getElementById('note-title').value,
+            desc: document.getElementById('note-desc').value,
+            deadline: document.getElementById('note-deadline').value
+        };
+        masterData.notes.push(entry);
+        updateData();
+        this.reset();
+    });
 
     function updateData() {
-        localStorage.setItem('peamco_visual_data', JSON.stringify(dataStore));
+        localStorage.setItem('peamco_master_data', JSON.stringify(masterData));
         render();
-
-        const cleanJSON = dataStore.map(({codigo, ensayo, inicio, fin, preliminar, final, pendiente}) => 
-            ({codigo, ensayo, inicio, fin, preliminar, final, pendiente}));
-
-        // Iniciar la sincronización automática con GitHub
-        syncToGitHub(cleanJSON);
+        syncToGitHub(masterData);
     }
 
     async function syncToGitHub(cleanJSON) {
@@ -429,17 +588,16 @@
         const path = 'programas.json';
 
         if (!owner || !repo || !token) {
-            showStatus("⚠️ Datos guardados localmente. Configura tus datos de GitHub arriba para sincronizar el robot de forma automática.", "error");
+            showStatus("⚠️ Guardado localmente. Configura GitHub para que el robot de alertas funcione automáticamente.", "error");
             return;
         }
 
-        showStatus("🔄 Subiendo cambios a GitHub de forma segura...", "loading");
+        showStatus("🔄 Sincronizando con tu repositorio de GitHub...", "loading");
 
         try {
             const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`;
             let sha = "";
 
-            // 1. Intentar obtener el archivo para conseguir su hash (sha) necesario para actualizarlo
             const resGet = await fetch(url, {
                 headers: { "Authorization": `token ${token}` }
             });
@@ -447,11 +605,8 @@
             if (resGet.status === 200) {
                 const fileData = await resGet.json();
                 sha = fileData.sha;
-            } else if (resGet.status !== 404) {
-                throw new Error("No se pudo conectar a GitHub o el repositorio no existe.");
             }
 
-            // 2. Subir (Commit) el nuevo archivo programas.json
             const jsonString = JSON.stringify(cleanJSON, null, 2);
             const contentBase64 = btoa(unescape(encodeURIComponent(jsonString)));
 
@@ -462,7 +617,7 @@
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    message: "Actualización automática de programas.json [Panel Web]",
+                    message: "Actualización de base de datos desde panel web interactivo",
                     content: contentBase64,
                     sha: sha || undefined,
                     branch: branch
@@ -470,28 +625,225 @@
             });
 
             if (resPut.ok) {
-                showStatus("✅ ¡Cambios subidos a GitHub con éxito! El robot se ejecutará de forma automática.", "success");
+                showStatus("✅ ¡Sincronizado con éxito en GitHub! El robot tiene los datos actualizados.", "success");
             } else {
                 const errJson = await resPut.json();
-                throw new Error(errJson.message || "Error al subir cambios.");
+                throw new Error(errJson.message || "Error al subir.");
             }
 
         } catch (error) {
-            console.error(error);
             showStatus(`❌ Error de sincronización: ${error.message}`, "error");
         }
     }
 
+    function showStatus(text, type) {
+        const statusDiv = document.getElementById('sync-status');
+        statusDiv.className = `sync-status status-${type}`;
+        statusDiv.innerText = text;
+    }
+
+    function daysRemaining(targetDate) {
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        const target = new Date(targetDate + "T00:00:00");
+        return Math.ceil((target - today) / (1000 * 60 * 60 * 24));
+    }
+
+    function changeMonth(direction) {
+        currentCalendarDate.setMonth(currentCalendarDate.getMonth() + direction);
+        render();
+    }
+
+    // FORMATEADOR DE TABLA PARA CORREOS
+    function buildCustomEmail(item, mName, mDate, daysText) {
+        const subject = `NOTIFICACIÓN PEAMCO: Pendiente Urgente - ${item.codigo} [${item.ensayo}]`;
+        const body = `Estimado Equipo Comercial y Técnico,\n\n` +
+            `Se ha generado un recordatorio automático sobre el estado de entrega para el siguiente ensayo:\n\n` +
+            `========================================================================\n` +
+            `             REPORTE DE ESTADO DE ENSAYOS - PEAMCO S.A.S.              \n` +
+            `========================================================================\n` +
+            `  PROPIEDAD             |  DETALLES                                     \n` +
+            `------------------------|-----------------------------------------------\n` +
+            `  Código de Ensayo      |  ${item.codigo.padEnd(45, ' ')}\n` +
+            `  Nombre del Programa   |  ${item.ensayo.padEnd(45, ' ')}\n` +
+            `  Evento Crítico        |  ${mName.padEnd(45, ' ')}\n` +
+            `  Fecha Límite          |  ${mDate.padEnd(45, ' ')}\n` +
+            `  Estado de Entrega     |  ${daysText.toUpperCase().padEnd(45, ' ')}\n` +
+            `  Entregable Esperado   |  ${item.pendiente.padEnd(45, ' ')}\n` +
+            `========================================================================\n\n` +
+            `📌 ACCIÓN REQUERIDA:\n` +
+            `Por favor, verificar con prioridad la entrega de los informes o la ejecución del ensayo.\n\n` +
+            `Cordialmente,\n` +
+            `Área de Automatización Comercial\n` +
+            `PEAMCO S.A.S.`;
+
+        return `mailto:${CONFIG.correo}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    }
+
+    function getEventsForDate(dateStr) {
+        const events = [];
+        masterData.programs.forEach(item => {
+            if (item.inicio === dateStr) events.push({ type: 'program', label: `Inicio: [${item.codigo}] ${item.ensayo}`, color: 'var(--primary)', item });
+            if (item.fin === dateStr) events.push({ type: 'program', label: `Fin: [${item.codigo}] ${item.ensayo}`, color: 'var(--primary)', item });
+            if (item.preliminar === dateStr) events.push({ type: 'program', label: `Preliminar: [${item.codigo}] ${item.ensayo}`, color: 'var(--primary)', item });
+            if (item.final === dateStr) events.push({ type: 'program', label: `Final: [${item.codigo}] ${item.ensayo}`, color: 'var(--primary)', item });
+        });
+        masterData.notes.forEach(note => {
+            if (note.deadline === dateStr) events.push({ type: 'note', label: `Tarea: ${note.title} (${note.desc})`, color: 'var(--accent)', note });
+        });
+        return events;
+    }
+
+    // INTERACTIVIDAD: VER DETALLE EN MODAL ANIMADO
+    function openModalForDay(dateStr) {
+        const events = getEventsForDate(dateStr);
+        const modal = document.getElementById('modal-overlay');
+        const title = document.getElementById('modal-date-title');
+        const body = document.getElementById('modal-body-content');
+
+        title.innerText = `Tareas y Eventos del ${dateStr}`;
+        body.innerHTML = "";
+
+        if (events.length === 0) {
+            body.innerHTML = `<p style="color:#718096; text-align:center;">No hay pendientes ni eventos programados para este día. ¡Todo despejado!</p>`;
+        } else {
+            events.forEach(ev => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'modal-item';
+                
+                if (ev.type === 'program') {
+                    const days = daysRemaining(dateStr);
+                    const daysText = days < 0 ? 'Vencido hace ' + Math.abs(days) + ' días' : (days === 0 ? 'Vence hoy' : 'Faltan ' + days + ' días');
+                    const mailHref = buildCustomEmail(ev.item, "Evento del día", dateStr, daysText);
+                    const waMsg = `*ALERTA DE ENSAYO PEAMCO*\n\n• *Código:* ${ev.item.codigo}\n• *Ensayo:* ${ev.item.ensayo}\n• *Fecha:* ${dateStr} (${daysText.toUpperCase()})`;
+                    const waHref = `https://wa.me/${CONFIG.waNum}?text=${encodeURIComponent(waMsg)}`;
+
+                    itemDiv.style.borderLeft = `4px solid var(--primary)`;
+                    itemDiv.innerHTML = `
+                        <strong style="color:var(--primary);">${ev.label}</strong><br>
+                        <small>Entregable Técnico: <b>${ev.item.pendiente}</b> (${ev.item.status})</small>
+                        <div style="margin-top: 10px; display:flex; gap:8px;">
+                            <a href="${mailHref}" class="btn-action btn-mail" style="padding:4px 8px; font-size:11px;">📧 Enviar Tabla</a>
+                            <a href="${waHref}" target="_blank" class="btn-action btn-wa" style="padding:4px 8px; font-size:11px;">📲 WhatsApp</a>
+                        </div>
+                    `;
+                } else {
+                    const days = daysRemaining(dateStr);
+                    const daysText = days < 0 ? 'Vencido' : (days === 0 ? 'Vence hoy' : 'Faltan ' + days + ' días');
+                    const mailHref = `mailto:${CONFIG.correo}?subject=${encodeURIComponent('Pendiente: ' + ev.note.title)}&body=${encodeURIComponent(ev.note.desc)}`;
+                    const waHref = `https://wa.me/${CONFIG.waNum}?text=${encodeURIComponent('*TAREA COMERCIAL*\n\n' + ev.note.title + '\n' + ev.note.desc)}`;
+
+                    itemDiv.style.borderLeft = `4px solid var(--accent)`;
+                    itemDiv.innerHTML = `
+                        <strong style="color:var(--accent);">${ev.label}</strong><br>
+                        <small>Detalles: ${ev.note.desc}</small>
+                        <div style="margin-top: 10px; display:flex; gap:8px;">
+                            <a href="${mailHref}" class="btn-action btn-mail" style="background-color: var(--accent); padding:4px 8px; font-size:11px;">📧 Correo</a>
+                            <a href="${waHref}" target="_blank" class="btn-action btn-wa" style="padding:4px 8px; font-size:11px;">📲 WhatsApp</a>
+                        </div>
+                    `;
+                }
+                body.appendChild(itemDiv);
+            });
+        }
+
+        modal.classList.add('active');
+    }
+
+    function closeModalDirect() {
+        document.getElementById('modal-overlay').classList.remove('active');
+    }
+
+    function closeModal(e) {
+        if (e.target.id === 'modal-overlay') {
+            closeModalDirect();
+        }
+    }
+
+    // RENDERIZAR TODO EL DASHBOARD Y EL CALENDARIO
     function render() {
-        const tableBody = document.getElementById('table-entries');
+        const grid = document.getElementById('calendar-grid');
+        const monthYearText = document.getElementById('calendar-month-year');
         const alertSection = document.getElementById('alert-section');
         const alertContainer = document.getElementById('alert-container');
-        
-        tableBody.innerHTML = "";
+        const elementsList = document.getElementById('elements-list');
+
+        grid.innerHTML = "";
         alertContainer.innerHTML = "";
+        elementsList.innerHTML = "";
+
+        const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        const year = currentCalendarDate.getFullYear();
+        const month = currentCalendarDate.getMonth();
+
+        monthYearText.innerText = `${monthNames[month]} ${year}`;
+
+        // Añadir cabeceras de días de la semana
+        const weekDays = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+        weekDays.forEach(day => {
+            const el = document.createElement('div');
+            el.className = 'calendar-day-name';
+            el.innerText = day;
+            grid.appendChild(el);
+        });
+
+        const firstDayIndex = new Date(year, month, 1).getDay();
+        const totalDays = new Date(year, month + 1, 0).getDate();
+        const prevTotalDays = new Date(year, month, 0).getDate();
+
+        // Rellenar días del mes anterior
+        for (let i = firstDayIndex - 1; i >= 0; i--) {
+            const cell = document.createElement('div');
+            cell.className = 'calendar-cell other-month';
+            cell.innerHTML = `<span class="calendar-date-num">${prevTotalDays - i}</span>`;
+            grid.appendChild(cell);
+        }
+
+        // Rellenar días del mes actual
+        const todayStr = new Date().toISOString().split('T')[0];
         let hasAlerts = false;
 
-        dataStore.forEach(item => {
+        for (let day = 1; day <= totalDays; day++) {
+            const cell = document.createElement('div');
+            cell.className = 'calendar-cell';
+            
+            const dayFormatted = String(day).padStart(2, '0');
+            const monthFormatted = String(month + 1).padStart(2, '0');
+            const dateStr = `${year}-${monthFormatted}-${dayFormatted}`;
+
+            if (dateStr === todayStr) {
+                cell.classList.add('today');
+            }
+
+            cell.onclick = () => openModalForDay(dateStr);
+
+            // Buscar si hay eventos ese día para pintar los puntos de color
+            const events = getEventsForDate(dateStr);
+            let dotsHtml = '<div class="dots-container">';
+            let addedProgDot = false;
+            let addedNoteDot = false;
+
+            events.forEach(ev => {
+                if (ev.type === 'program' && !addedProgDot) {
+                    dotsHtml += '<span class="dot dot-program"></span>';
+                    addedProgDot = true;
+                }
+                if (ev.type === 'note' && !addedNoteDot) {
+                    dotsHtml += '<span class="dot dot-note"></span>';
+                    addedNoteDot = true;
+                }
+            });
+            dotsHtml += '</div>';
+
+            cell.innerHTML = `
+                <span class="calendar-date-num">${day}</span>
+                ${dotsHtml}
+            `;
+            grid.appendChild(cell);
+        }
+
+        // 2. RENDERIZAR SECCIÓN DE ALERTAS ACTIVAS (Vencen en <= 2 días)
+        masterData.programs.forEach(item => {
             const milestones = [
                 { date: item.inicio, name: "Inicio de Ejecución" },
                 { date: item.fin, name: "Fin de Ejecución" },
@@ -501,23 +853,24 @@
 
             milestones.forEach(m => {
                 const days = daysRemaining(m.date);
-                if (days <= 2 && days >= -7) {
+                if (days <= 2 && days >= -7 && item.status === "Pendiente") {
                     hasAlerts = true;
                     const isOverdue = days < 0;
+                    const daysText = isOverdue ? 'Vencido hace ' + Math.abs(days) + ' días' : (days === 0 ? 'Vence HOY' : 'Faltan ' + days + ' días');
                     
-                    const msg = `Hola Equipo Técnico,\n\nLes recordamos que según los plazos comerciales, está próximo o vencido el hito del programa:\n\n• Código: ${item.codigo}\n• Ensayo: ${item.ensayo}\n• Evento: ${m.name} (${m.date})\n• Entregable: ${item.pendiente}\n\nPor favor confirmar gestión.\n\nSaludos,\nÁrea Comercial.`;
-                    const mailHref = `mailto:${CONFIG.correo}?subject=${encodeURIComponent('RECORDATORIO: ' + item.codigo)}&body=${encodeURIComponent(msg)}`;
-                    const waHref = `https://wa.me/${CONFIG.waNum}?text=${encodeURIComponent('*ALERTA PEAMCO*\n\n' + msg)}`;
+                    const waMsg = `*ALERTA PEAMCO*\n\n• *Código:* ${item.codigo}\n• *Ensayo:* ${item.ensayo}\n• *Hito:* ${m.name}\n• *Fecha Límite:* ${m.date} (${daysText.toUpperCase()})`;
+                    const mailHref = buildCustomEmail(item, m.name, m.date, daysText);
+                    const waHref = `https://wa.me/${CONFIG.waNum}?text=${encodeURIComponent(waMsg)}`;
 
                     const card = document.createElement('div');
                     card.className = `alert-card ${isOverdue ? 'vencido' : ''}`;
                     card.innerHTML = `
                         <div>
                             <strong style="color:var(--primary);">[${item.codigo}] ${item.ensayo}</strong> — ${m.name}<br>
-                            <small style="font-weight:700; color:${isOverdue ? 'var(--danger)' : 'var(--warning)'};">${isOverdue ? 'VENCIDO HACE ' + Math.abs(days) + ' DÍAS' : (days === 0 ? 'VENCE HOY' : 'FALTAN ' + days + ' DÍAS')}</small>
+                            <small style="font-weight:700; color:${isOverdue ? 'var(--danger)' : 'var(--warning)'};">${daysText.toUpperCase()}</small>
                         </div>
                         <div class="alert-buttons">
-                            <a href="${mailHref}" class="btn-action btn-mail">📧 Correo</a>
+                            <a href="${mailHref}" class="btn-action btn-mail">📧 Enviar Tabla</a>
                             <a href="${waHref}" target="_blank" class="btn-action btn-wa">📲 WhatsApp</a>
                         </div>
                     `;
@@ -525,26 +878,63 @@
                 }
             });
 
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td><strong style="color:var(--primary);">${item.codigo}</strong><br><span style="color:#718096;font-size:12px;">${item.ensayo}</span></td>
-                <td><span style="font-size:12px;">Inicia:<b>${item.inicio}</b><br>Fin:<b>${item.fin}</b></span></td>
-                <td><span style="font-size:12px;">Preliminar:<b>${item.preliminar}</b><br>Final:<b>${item.final}</b></span></td>
-                <td>
-                    <span class="badge ${item.status === 'Pendiente' ? 'badge-pending' : 'badge-success'}" onclick="toggleStatus(${item.id})">
-                        ${item.pendiente}: ${item.status}
-                    </span>
-                </td>
-                <td><button class="btn-delete" onclick="deleteItem(${item.id})">🗑️</button></td>
+            // Elemento en la lista compacta
+            const listItem = document.createElement('div');
+            listItem.className = 'compact-list-item';
+            listItem.innerHTML = `
+                <div>
+                    <strong>[${item.codigo}] ${item.ensayo}</strong><br>
+                    <small style="color:#718096;">Entregable: <b>${item.pendiente}</b> | Estado: <span style="cursor:pointer; color:var(--primary); font-weight:bold;" onclick="toggleStatus(${item.id})">${item.status}</span></small>
+                </div>
+                <button class="close-modal" onclick="deleteItem(${item.id})" style="font-size:16px;">🗑️</button>
             `;
-            tableBody.appendChild(row);
+            elementsList.appendChild(listItem);
+        });
+
+        masterData.notes.forEach(note => {
+            const days = daysRemaining(note.deadline);
+            if (days <= 2 && days >= -7) {
+                hasAlerts = true;
+                const isOverdue = days < 0;
+                const daysText = isOverdue ? 'Vencido hace ' + Math.abs(days) + ' días' : (days === 0 ? 'Vence HOY' : 'Faltan ' + days + ' días');
+
+                const mailHref = `mailto:${CONFIG.correo}?subject=${encodeURIComponent('AVISO: ' + note.title)}&body=${encodeURIComponent(note.desc)}`;
+                const waHref = `https://wa.me/${CONFIG.waNum}?text=${encodeURIComponent('*PENDIENTE PEAMCO*\n\n' + note.title + '\n' + note.desc)}`;
+
+                const card = document.createElement('div');
+                card.className = `alert-card ${isOverdue ? 'vencido' : ''}`;
+                card.style.borderLeftColor = "var(--accent)";
+                card.innerHTML = `
+                    <div>
+                        <strong style="color:var(--accent);">📌 [Pendiente] ${note.title}</strong><br>
+                        <span style="font-size:12px; color:#4A5568;">${note.desc}</span><br>
+                        <small style="font-weight:700; color:var(--danger);">${daysText.toUpperCase()}</small>
+                    </div>
+                    <div class="alert-buttons">
+                        <a href="${mailHref}" class="btn-action btn-mail" style="background-color: var(--accent);">📧 Correo</a>
+                        <a href="${waHref}" target="_blank" class="btn-action btn-wa">📲 WhatsApp</a>
+                    </div>
+                `;
+                alertContainer.appendChild(card);
+            }
+
+            const listItem = document.createElement('div');
+            listItem.className = 'compact-list-item';
+            listItem.innerHTML = `
+                <div>
+                    <strong style="color:var(--accent);">📌 ${note.title}</strong><br>
+                    <small style="color:#718096;">Detalles: ${note.desc} | Límite: <b>${note.deadline}</b></small>
+                </div>
+                <button class="close-modal" onclick="deleteNote(${note.id})" style="font-size:16px;">🗑️</button>
+            `;
+            elementsList.appendChild(listItem);
         });
 
         alertSection.style.display = hasAlerts ? 'block' : 'none';
     }
 
     function toggleStatus(id) {
-        dataStore = dataStore.map(item => {
+        masterData.programs = masterData.programs.map(item => {
             if (item.id === id) item.status = item.status === "Pendiente" ? "Entregado" : "Pendiente";
             return item;
         });
@@ -552,8 +942,15 @@
     }
 
     function deleteItem(id) {
-        if (confirm("¿Eliminar este programa?")) {
-            dataStore = dataStore.filter(item => item.id !== id);
+        if (confirm("¿Eliminar este programa de ensayo de la base de datos?")) {
+            masterData.programs = masterData.programs.filter(item => item.id !== id);
+            updateData();
+        }
+    }
+
+    function deleteNote(id) {
+        if (confirm("¿Completaste esta tarea? Se eliminará del calendario.")) {
+            masterData.notes = masterData.notes.filter(note => note.id !== id);
             updateData();
         }
     }
