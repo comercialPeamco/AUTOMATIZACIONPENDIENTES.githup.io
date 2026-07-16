@@ -1,4 +1,16 @@
 {
-  "programs": [],
+  "programs": [
+    {
+      "id": 1784222399334,
+      "codigo": "F",
+      "ensayo": "T",
+      "inicio": "2026-07-10",
+      "fin": "2026-07-02",
+      "preliminar": "2026-07-02",
+      "final": "2026-07-23",
+      "pendiente": "Instrucciones de Ensayo",
+      "status": "Pendiente"
+    }
+  ],
   "notes": []
 }
