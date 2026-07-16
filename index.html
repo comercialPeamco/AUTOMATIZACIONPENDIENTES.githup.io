@@ -394,6 +394,27 @@
             transition: background 0.2s;
         }
         .btn-voice:hover { background-color: #553395; }
+
+        /* NUEVO BOTÓN DE PRUEBA DE ALERTAS */
+        .btn-test {
+            background-color: #DD6B20;
+            color: var(--white);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+            grid-column: span 2;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .btn-test:hover { background-color: #C05621; }
+        .btn-test:disabled { background-color: #A0AEC0; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -428,6 +449,10 @@
                 <label style="font-size:11px;">Token de GitHub (PAT):</label>
                 <input type="password" id="gh_token" placeholder="Pega aquí tu token ghp_..." style="padding:6px; font-size:12px;">
             </div>
+            <!-- BOTÓN DE PRUEBA DE CORREO -->
+            <button id="btn-test-email" onclick="enviarCorreoPrueba()" class="btn-test">
+                🚀 Probar Alertas de Correo Ahora
+            </button>
         </div>
     </div>
 
@@ -661,8 +686,10 @@
 
     function showStatus(text, type) {
         const statusDiv = document.getElementById('sync-status');
-        statusDiv.className = `sync-status status-${type}`;
-        statusDiv.innerText = text;
+        if (statusDiv) {
+            statusDiv.className = `sync-status status-${type}`;
+            statusDiv.innerText = text;
+        }
     }
 
     function daysRemaining(targetDate) {
@@ -683,7 +710,7 @@
         const body = `Estimado Equipo Comercial y Técnico,\n\n` +
             `Se ha generado un recordatorio automático sobre el estado de entrega para el siguiente ensayo:\n\n` +
             `========================================================================\n` +
-            `               REPORTE DE ESTADO DE ENSAYOS - PEAMCO S.A.S.              \n` +
+            `                               REPORTE DE ESTADO DE ENSAYOS - PEAMCO S.A.S.              \n` +
             `========================================================================\n` +
             `  PROPIEDAD             |  DETALLES                                     \n` +
             `------------------------|-----------------------------------------------\n` +
@@ -816,25 +843,18 @@
         if (masterData.notes.length === 0) {
             textoALeer += "No hay tareas adicionales en la bitácora.";
         } else {
-            textoALeer += `En la bitácora cuentas con ${masterData.notes.length} tareas pendientes. `;
+            textoALeer += `En la bitácora cuentas con ${masterData.notes.length} tareas. `;
             masterData.notes.forEach((note, index) => {
-                textoALeer += `Tarea número ${index + 1}: Titulada ${note.title}. Detalles: ${note.desc}. `;
+                textoALeer += `Tarea número ${index + 1}: ${note.title}, con detalles: ${note.desc}. `;
             });
         }
 
         const utterance = new SpeechSynthesisUtterance(textoALeer);
-        utterance.lang = 'es-ES'; // Forzar idioma español
-        utterance.rate = 0.95;    // Velocidad ligeramente natural
-        utterance.pitch = 1.0;   
+        utterance.lang = 'es-ES';
+        utterance.rate = 0.95;
 
-        // Intentar capturar una voz en español del navegador
-        const voces = window.speechSynthesis.getVoices();
-        const vozEspanol = voces.find(v => v.lang.startsWith('es'));
-        if (vozEspanol) utterance.voice = vozEspanol;
-
-        // Cambiar estados visuales del botón durante la lectura
         utterance.onstart = () => {
-            boton.innerText = "⏹️ Detener lectura de voz";
+            boton.innerText = "⏹️ Detener Lectura de Voz";
             boton.style.backgroundColor = "var(--danger)";
         };
 
@@ -843,66 +863,108 @@
             boton.style.backgroundColor = "var(--accent)";
         };
 
-        utterance.onerror = () => {
-            boton.innerText = "🔊 Leer mis pendientes en voz alta";
-            boton.style.backgroundColor = "var(--accent)";
-        };
-
         window.speechSynthesis.speak(utterance);
     }
 
-    // RENDERIZAR TODO EL DASHBOARD Y EL CALENDARIO
+    // NUEVA FUNCIÓN: DISPARAR EL ROBOT EN GITHUB PARA ENVIAR CORREO DE PRUEBA
+    async function enviarCorreoPrueba() {
+        const owner = localStorage.getItem('gh_owner');
+        const repo = localStorage.getItem('gh_repo');
+        const branch = localStorage.getItem('gh_branch') || 'main';
+        const token = localStorage.getItem('gh_token');
+
+        if (!owner || !repo || !token) {
+            alert("❌ Primero debes configurar y guardar tus credenciales de GitHub (Usuario, Repositorio y Token) para probar el robot.");
+            return;
+        }
+
+        const btn = document.getElementById('btn-test-email');
+        const originalText = btn.innerHTML;
+        
+        btn.disabled = true;
+        btn.innerHTML = "⏳ Despertando robot...";
+
+        const url = `https://api.github.com/repos/${owner}/${repo}/actions/workflows/alertas.yml/dispatches`;
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ ref: branch })
+            });
+
+            if (response.status === 204) {
+                alert("🚀 ¡Señal enviada con éxito! Tu robot de GitHub acaba de arrancar en este instante. El correo llegará en 1 o 2 minutos si tienes algún pendiente programado para hoy o mañana.");
+            } else {
+                alert(`⚠️ GitHub respondió con código ${response.status}. Verifica que tu archivo de workflow se llame "alertas.yml" y que acepte "workflow_dispatch" en sus disparadores.`);
+            }
+        } catch (error) {
+            console.error("Error al arrancar el robot:", error);
+            alert("❌ Error de red al intentar conectar con la API de GitHub.");
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    }
+
+    // RENDERIZADO DEL CALENDARIO Y ELEMENTOS REGISTRADOS
     function render() {
         const grid = document.getElementById('calendar-grid');
-        const monthYearText = document.getElementById('calendar-month-year');
+        const monthYearHeader = document.getElementById('calendar-month-year');
+        const elementsList = document.getElementById('elements-list');
         const alertSection = document.getElementById('alert-section');
         const alertContainer = document.getElementById('alert-container');
-        const elementsList = document.getElementById('elements-list');
 
-        grid.innerHTML = "";
-        alertContainer.innerHTML = "";
-        elementsList.innerHTML = "";
+        if (!grid) return;
 
-        const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        grid.innerHTML = '';
+        elementsList.innerHTML = '';
+        alertContainer.innerHTML = '';
+        let hasAlerts = false;
+
         const year = currentCalendarDate.getFullYear();
         const month = currentCalendarDate.getMonth();
 
-        monthYearText.innerText = `${monthNames[month]} ${year}`;
+        const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        monthYearHeader.innerText = `${meses[month]} ${year}`;
 
-        // Añadir cabeceras de días de la semana
-        const weekDays = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
-        weekDays.forEach(day => {
-            const el = document.createElement('div');
-            el.className = 'calendar-day-name';
-            el.innerText = day;
-            grid.appendChild(el);
+        // Días de la semana
+        const diasSemana = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+        diasSemana.forEach(d => {
+            const dayNameDiv = document.createElement('div');
+            dayNameDiv.className = 'calendar-day-name';
+            dayNameDiv.innerText = d;
+            grid.appendChild(dayNameDiv);
         });
 
         const firstDayIndex = new Date(year, month, 1).getDay();
-        const totalDays = new Date(year, month + 1, 0).getDate();
-        const prevTotalDays = new Date(year, month, 0).getDate();
+        const lastDate = new Date(year, month + 1, 0).getDate();
+        const prevLastDate = new Date(year, month, 0).getDate();
 
         // Rellenar días del mes anterior
-        for (let i = firstDayIndex - 1; i >= 0; i--) {
+        for (let i = firstDayIndex; i > 0; i--) {
             const cell = document.createElement('div');
             cell.className = 'calendar-cell other-month';
-            cell.innerHTML = `<span class="calendar-date-num">${prevTotalDays - i}</span>`;
+            cell.innerHTML = `<span class="calendar-date-num">${prevLastDate - i + 1}</span>`;
             grid.appendChild(cell);
         }
 
-        // Rellenar días del mes actual
-        const todayStr = new Date().toISOString().split('T')[0];
-        let hasAlerts = false;
+        const today = new Date();
+        today.setHours(0,0,0,0);
 
-        for (let day = 1; day <= totalDays; day++) {
+        // Rellenar días del mes actual
+        for (let day = 1; day <= lastDate; day++) {
             const cell = document.createElement('div');
             cell.className = 'calendar-cell';
             
-            const dayFormatted = String(day).padStart(2, '0');
-            const monthFormatted = String(month + 1).padStart(2, '0');
-            const dateStr = `${year}-${monthFormatted}-${dayFormatted}`;
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const cellDate = new Date(dateStr + "T00:00:00");
 
-            if (dateStr === todayStr) {
+            if (cellDate.getTime() === today.getTime()) {
                 cell.classList.add('today');
             }
 
@@ -924,84 +986,102 @@
             grid.appendChild(cell);
         }
 
-        // Procesar Alertas Críticas de Ensayos (Faltan 2 días o vencido)
-        masterData.programs.forEach(item => {
-            const fechasEvaluables = [
-                { name: "Fin Ejecución", date: item.fin },
-                { name: "Entrega Preliminar", date: item.preliminar },
-                { name: "Entrega Final", date: item.final }
-            ];
+        // Renderizar sección visual de alertas (2 días o menos) e historial inferior
+        masterData.programs.forEach(p => {
+            // Evaluamos alertas para fecha preliminar y final
+            ['preliminar', 'final'].forEach(fechaTipo => {
+                const fTarget = p[fechaTipo];
+                if (fTarget) {
+                    const diff = daysRemaining(fTarget);
+                    if (diff <= 2) {
+                        hasAlerts = true;
+                        const card = document.createElement('div');
+                        card.className = `alert-card ${diff < 0 ? 'vencido' : ''}`;
+                        const daysText = diff < 0 ? `VENCIDO HACE ${Math.abs(diff)} DÍAS` : (diff === 0 ? '¡VENCE HOY!' : `FALTAN ${diff} DÍAS`);
+                        const mailHref = buildCustomEmail(p, `Entrega ${fechaTipo.toUpperCase()}`, fTarget, daysText);
+                        const waMsg = `*ALERTA DE ENSAYO PEAMCO*\n\n• *Código:* ${p.codigo}\n• *Ensayo:* ${p.ensayo}\n• *Entregable:* Informe ${fechaTipo.toUpperCase()} (${p.pendiente})\n• *Límite:* ${fTarget} (${daysText})`;
+                        const waHref = `https://wa.me/${CONFIG.waNum}?text=${encodeURIComponent(waMsg)}`;
 
-            fechasEvaluables.forEach(f => {
-                const rem = daysRemaining(f.date);
-                if (rem <= 2) {
-                    hasAlerts = true;
-                    const alertCard = document.createElement('div');
-                    alertCard.className = `alert-card ${rem < 0 ? 'vencido' : ''}`;
-
-                    const daysText = rem < 0 ? `🚨 VENCIDO hace ${Math.abs(rem)} días` : (rem === 0 ? `⚠️ VENCE HOY` : `⏳ Faltan ${rem} días`);
-                    const mailHref = buildCustomEmail(item, f.name, f.date, daysText);
-                    const waMsg = `*ALERTA CRÍTICA PEAMCO*\n\n• *Código:* ${item.codigo}\n• *Ensayo:* ${item.ensayo}\n• *Evento:* ${f.name}\n• *Estado:* ${daysText.toUpperCase()}`;
-                    const waHref = `https://wa.me/${CONFIG.waNum}?text=${encodeURIComponent(waMsg)}`;
-
-                    alertCard.innerHTML = `
-                        <div>
-                            <strong>[${item.codigo}] ${item.ensayo}</strong> — <span style="color:var(--danger); font-weight:bold;">${f.name}</span><br>
-                            <small>Fecha Límite: ${f.date} (${daysText}) | Pendiente: <b>${item.pendiente}</b></small>
-                        </div>
-                        <div class="alert-buttons">
-                            <a href="${mailHref}" class="btn-action btn-mail">📧 Enviar Alerta</a>
-                            <a href="${waHref}" target="_blank" class="btn-action btn-wa">📲 WhatsApp</a>
-                        </div>
-                    `;
-                    alertContainer.appendChild(alertCard);
+                        card.innerHTML = `
+                            <div>
+                                <strong style="color:var(--danger)">⚠️ [${p.codigo}] ${p.ensayo}</strong><br>
+                                <small>Pendiente: Informe ${fechaTipo.toUpperCase()} (${p.pendiente}) | Límite: <b>${fTarget}</b> (${daysText})</small>
+                            </div>
+                            <div class="alert-buttons">
+                                <a href="${mailHref}" class="btn-action btn-mail">📧 Enviar Alerta</a>
+                                <a href="${waHref}" target="_blank" class="btn-action btn-wa">📲 WhatsApp</a>
+                            </div>
+                        `;
+                        alertContainer.appendChild(card);
+                    }
                 }
             });
+
+            // Registro listado editable compacto
+            const compactItem = document.createElement('div');
+            compactItem.className = 'compact-list-item';
+            compactItem.innerHTML = `
+                <div>
+                    <strong>[${p.codigo}] ${p.ensayo}</strong><br>
+                    <small>Fin: ${p.fin} | Preliminar: ${p.preliminar} | Final: ${p.final}</small>
+                </div>
+                <button onclick="eliminarPrograma(${p.id})" style="background:var(--danger); color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:11px;">Eliminar</button>
+            `;
+            elementsList.appendChild(compactItem);
         });
 
-        alertSection.style.display = hasAlerts ? "block" : "none";
+        // Alertas para notas de la bitácora
+        masterData.notes.forEach(n => {
+            const diff = daysRemaining(n.deadline);
+            if (diff <= 2) {
+                hasAlerts = true;
+                const card = document.createElement('div');
+                card.className = `alert-card ${diff < 0 ? 'vencido' : ''}`;
+                const daysText = diff < 0 ? `VENCIDA` : (diff === 0 ? '¡VENCE HOY!' : `FALTAN ${diff} DÍAS`);
+                const mailHref = `mailto:${CONFIG.correo}?subject=${encodeURIComponent('Pendiente: ' + n.title)}&body=${encodeURIComponent(n.desc)}`;
+                const waHref = `https://wa.me/${CONFIG.waNum}?text=${encodeURIComponent('*TAREA COMERCIAL PEAMCO*\n\n• ' + n.title + '\n• Detalle: ' + n.desc)}`;
 
-        // Renderizar la lista compacta inferior de borrado
-        if(masterData.programs.length === 0 && masterData.notes.length === 0) {
-            elementsList.innerHTML = `<p style="color:#718096; text-align:center; font-size:13px;">No hay datos registrados aún.</p>`;
-        } else {
-            masterData.programs.forEach(p => {
-                const item = document.createElement('div');
-                item.className = 'compact-list-item';
-                item.innerHTML = `
-                    <span style="font-size:13px;">🔵 <b>[Ensayo]</b> ${p.codigo} - ${p.ensayo}</span>
-                    <button class="btn-action btn-mail" style="background-color:var(--danger); padding:4px 10px; font-size:11px;" onclick="eliminarElemento('programs', ${p.id})">Eliminar</button>
+                card.innerHTML = `
+                    <div>
+                        <strong style="color:var(--accent)">📋 Tarea: ${n.title}</strong><br>
+                        <small>Detalle: ${n.desc} | Límite: <b>${n.deadline}</b> (${daysText})</small>
+                    </div>
+                    <div class="alert-buttons">
+                        <a href="${mailHref}" class="btn-action btn-mail" style="background-color: var(--accent)">📧 Correo</a>
+                        <a href="${waHref}" target="_blank" class="btn-action btn-wa">📲 WhatsApp</a>
+                    </div>
                 `;
-                elementsList.appendChild(item);
-            });
+                alertContainer.appendChild(card);
+            }
 
-            masterData.notes.forEach(n => {
-                const item = document.createElement('div');
-                item.className = 'compact-list-item';
-                item.innerHTML = `
-                    <span style="font-size:13px;">🟣 <b>[Bitácora]</b> ${n.title}</span>
-                    <button class="btn-action btn-mail" style="background-color:var(--danger); padding:4px 10px; font-size:11px;" onclick="eliminarElemento('notes', ${n.id})">Eliminar</button>
-                `;
-                elementsList.appendChild(item);
-            });
-        }
+            const compactItem = document.createElement('div');
+            compactItem.className = 'compact-list-item';
+            compactItem.innerHTML = `
+                <div>
+                    <strong>📝 Tarea: ${n.title}</strong><br>
+                    <small>Límite: ${n.deadline}</small>
+                </div>
+                <button onclick="eliminarNota(${n.id})" style="background:var(--danger); color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:11px;">Eliminar</button>
+            `;
+            elementsList.appendChild(compactItem);
+        });
+
+        alertSection.style.display = hasAlerts ? 'block' : 'none';
     }
 
-    function eliminarElemento(arrayName, id) {
-        if(confirm("¿Seguro que deseas eliminar este registro?")) {
-            masterData[arrayName] = masterData[arrayName].filter(el => el.id !== id);
-            updateData();
-        }
+    // FUNCIONES DE ELIMINACIÓN
+    function eliminarPrograma(id) {
+        masterData.programs = masterData.programs.filter(x => x.id !== id);
+        updateData();
     }
 
-    // Inicializar la carga visual
-    window.onload = () => {
-        render();
-        // Carga inicial de voces de forma asíncrona para navegadores basados en Chromium
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.getVoices();
-        }
-    };
+    function eliminarNota(id) {
+        masterData.notes = masterData.notes.filter(x => x.id !== id);
+        updateData();
+    }
+
+    // Inicializar renderizado inicial
+    render();
 </script>
 
 </body>
